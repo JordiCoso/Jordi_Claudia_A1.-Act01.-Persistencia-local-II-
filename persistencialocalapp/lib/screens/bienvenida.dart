@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '/models/usuario.dart';
 import '/screens/principal.dart';
 import '/services/PreferenciasService.dart';
+import '/services/DataBaseHelper.dart';
 
 class Bienvenida extends StatefulWidget {
   // Nos pasan el servicio.
@@ -17,6 +18,8 @@ class Bienvenida extends StatefulWidget {
 class _BienvenidaState extends State<Bienvenida> {
   final _nombreController = TextEditingController();
   final _numeroController = TextEditingController();
+  final _basedatos1 = Databasehelper.crear();
+  final _basedatos2 = Databasehelper.crear();
 
   @override
   void dispose() {
@@ -99,6 +102,7 @@ class _BienvenidaState extends State<Bienvenida> {
    * en dart es mas un placeholder que algo no usado pero me sirve.
    */
   void _validarInput(_) {
+    print(identical(_basedatos1, _basedatos2));
     // Asumimos que no es valido avanzar hasta que se demuestre lo contrario.
     _validoAvanzar = false;
     if (_comprobarNombre()) {
