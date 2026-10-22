@@ -3,17 +3,23 @@ import 'package:sqflite/sqflite.dart';
 
 class Databasehelper {
   // variable de clase para no abrir base de datos otra vez.
-  late Database _baseDeDatos;
+  static final _baseDeDatos = Databasehelper._crear();
+  static Databasehelper get = _baseDeDatos;
+  bool isInitialized = false;
+  Database? _basedatos;
 
   //Especifico un constructor privado para que no se pueda llamar a new.
-  Databasehelper._crear() {}
+  Databasehelper._crear();
 
-  static Future<Databasehelper> crear() async {
-    var inicializando = Databasehelper._crear();
+  Future<Database?> basedatos() async {
+    if (!isInitialized) await _iniciar();
+    return _basedatos;
+  }
 
+  Future _iniciar() async {
     final ruta = join(await getDatabasesPath(), 'habitos.db');
 
-    inicializando._baseDeDatos = await openDatabase(
+    _basedatos = await openDatabase(
       ruta,
       version: 1,
       onCreate: (db, version) => db.execute(
@@ -22,7 +28,5 @@ class Databasehelper {
         'nombre TEXT NOT NULL)',
       ),
     );
-
-    return inicializando;
   }
 }
