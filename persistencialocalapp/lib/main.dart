@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '/screens/bienvenida.dart';
-import '/screens/principal.dart';
-import '/services/PreferenciasService.dart';
+import 'screens/bienvenida.dart';
+import 'screens/principal.dart';
+import 'services/PreferenciasService.dart';
 
 import 'models/usuario.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   //creamos el servicio de preferencias.
   PreferenciasService _preferenciasService = await PreferenciasService.crear();
 
