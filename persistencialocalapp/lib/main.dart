@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'screens/bienvenida.dart';
+import 'screens/registro_page.dart';
 import 'screens/principal.dart';
 import 'services/PreferenciasService.dart';
 

@@ -9,6 +9,12 @@ class BotonPrincipal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(
+          horizontal: 32,
+          vertical: 16,
+        ),
+      ),
       onPressed: pulsar,
       child: Text(
         texto,
