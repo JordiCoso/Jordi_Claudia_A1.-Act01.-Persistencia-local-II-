@@ -40,13 +40,25 @@ class Databasehelper {
     var baseCreada = await openDatabase(
       ruta,
       version: 1,
-      onCreate: (db, version) => db.execute(
-        'CREATE TABLE habitos ('
-        'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-        'nombre TEXT NOT NULL)',
-      ),
+      onCreate: creacionBaseDatos,
     );
 
     return baseCreada;
+  }
+
+  void creacionBaseDatos(Database db, int version) {
+    db.execute(
+      'CREATE TABLE habitos ('
+      'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+      'nombre TEXT NOT NULL)',
+    );
+    db.execute('CREATE TABLE usuarios ('
+        'usuario TEXT PRIMARY KEY, '
+        'nombre TEXT NOT NULL'
+        'apellidos TEXT NOT NULL'
+        'email TEXT NOT NULL'
+        'contrasena TEXT NOT NULL'
+        'fecha_creacion TEXT NOT NULL'
+        'rol TEXT NOT NULL)');
   }
 }
