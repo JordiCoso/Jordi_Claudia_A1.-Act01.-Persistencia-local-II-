@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:habitosapp/services/DataBaseHelper.dart';
 
-import '/screens/bienvenida.dart';
-import '/screens/principal.dart';
-import '/services/PreferenciasService.dart';
+import 'screens/bienvenida.dart';
+import 'screens/registro_page.dart';
+import 'screens/principal.dart';
+import 'services/PreferenciasService.dart';
 
 import 'models/usuario.dart';
 
