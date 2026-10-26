@@ -12,16 +12,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //creamos el servicio de preferencias.
   PreferenciasService _preferenciasService = await PreferenciasService.crear();
-  final Databasehelper _basedatos1 = await Databasehelper;
-  final Databasehelper _basedatos2 = await Databasehelper.crear();
   //aumentamos el número de veces que se abre la aplicación.
   _preferenciasService.aumentarNumeroAperturar();
 
   //guardamos la fecha y hora de la última apertura.
   _preferenciasService.registrarApertura();
-  print(_basedatos1 == _basedatos2);
-  print('Base 1 $_basedatos1, Base 2  $_basedatos2');
-  print(_preferenciasService);
+
   //iniciamos la aplicación con el servicio de preferencias.
   runApp(MyApp(preferenciasService: _preferenciasService));
 }
