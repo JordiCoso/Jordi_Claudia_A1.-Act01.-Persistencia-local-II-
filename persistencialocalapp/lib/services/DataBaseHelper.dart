@@ -1,25 +1,43 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Databasehelper {
-  // variable de clase para no abrir base de datos otra vez.
-  static final _baseDeDatos = Databasehelper._crear();
-  static Databasehelper get = _baseDeDatos;
-  bool isInitialized = false;
-  Database? _basedatos;
+  static Databasehelper? _databasehelper;
 
-  //Especifico un constructor privado para que no se pueda llamar a new.
   Databasehelper._crear();
 
-  Future<Database?> basedatos() async {
-    if (!isInitialized) await _iniciar();
-    return _basedatos;
+  static Future<Databasehelper> crear() async {
+    if (_databasehelper != null) {
+      return await Future.value(_databasehelper);
+    }
+
+    var inicializando = Databasehelper._crear();
+
+    inicializando._basedatos = await inicializando._getbasedatos;
+
+    _databasehelper = inicializando;
+
+    return inicializando;
   }
 
-  Future _iniciar() async {
+  Database? _basedatos;
+
+  Future<Database> get _getbasedatos async {
+    if (_basedatos != null) {
+      return _basedatos!;
+    }
+
+    _basedatos = await _generarBase();
+    return _basedatos!;
+  }
+
+  Future<Database> _generarBase() async {
     final ruta = join(await getDatabasesPath(), 'habitos.db');
 
-    _basedatos = await openDatabase(
+    var baseCreada = await openDatabase(
       ruta,
       version: 1,
       onCreate: (db, version) => db.execute(
@@ -28,5 +46,7 @@ class Databasehelper {
         'nombre TEXT NOT NULL)',
       ),
     );
+
+    return baseCreada;
   }
 }
