@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '/services/PreferenciasService.dart';
+import '../services/preferenciasservice.dart';
 
 import '../models/habito.dart';
 import '../models/usuario.dart';

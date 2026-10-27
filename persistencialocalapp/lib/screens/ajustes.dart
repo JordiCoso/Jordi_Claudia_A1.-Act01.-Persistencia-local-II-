@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '/screens/bienvenida.dart';
-import '/services/PreferenciasService.dart';
+import '../services/preferenciasservice.dart';
 
 class PantallaAjustes extends StatefulWidget {
   //recibimos el preferenciasService.

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '/models/usuario.dart';
 import '/screens/principal.dart';
-import '/services/PreferenciasService.dart';
-import '/services/DataBaseHelper.dart';
+import '../services/preferenciasservice.dart';
 
 class Bienvenida extends StatefulWidget {
   // Nos pasan el servicio.
@@ -75,7 +74,7 @@ class _BienvenidaState extends State<Bienvenida> {
      */
     int numberoHabitos = int.parse(_numeroController.text.trim());
 
-    final Usuario usuario = new Usuario(
+    final Usuario usuario = Usuario(
       nombre: nombre,
       numeroHabitos: numberoHabitos,
     );

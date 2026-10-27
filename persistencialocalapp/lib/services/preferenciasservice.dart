@@ -10,7 +10,7 @@ class PreferenciasService {
   late SharedPreferences _preferencias;
 
   //Especifico un constructor privado para que no se pueda llamar a new.
-  PreferenciasService._crear() {}
+  PreferenciasService._crear();
 
   /*
   * Constructor publico, usa el privado para obtener el objeto donde luego
@@ -56,11 +56,11 @@ class PreferenciasService {
   }
 
   Usuario cargarUsuario() {
-    String _nombre = _preferencias.getString("usuario") ?? '';
-    int _numeroHabitos = _preferencias.getInt("numeroHabitos") ?? 0;
-    Usuario _usuario = new Usuario(nombre: _nombre, numeroHabitos: _numeroHabitos);
+    String nombre = _preferencias.getString("usuario") ?? '';
+    int numeroHabitos = _preferencias.getInt("numeroHabitos") ?? 0;
+    Usuario usuario = Usuario(nombre: nombre, numeroHabitos: numeroHabitos);
 
-    return _usuario;
+    return usuario;
   }
   void guardarHabitos(List<Habito> listaHabitos) {
     List<String> jsonHabitos = [];
