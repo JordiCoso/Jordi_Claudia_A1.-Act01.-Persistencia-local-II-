@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '/services/PreferenciasService.dart';
+import '../services/preferenciasservice.dart';
 import '/models/habito.dart';
 
 class PantallaEstadisticas extends StatefulWidget {
@@ -34,9 +34,9 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
   }
 
   //recuperamos la última apertura de la aplicación.
-  void cargarUltimaApertura(PreferenciasService _preferenciasService) {
+  void cargarUltimaApertura(PreferenciasService preferenciasService) {
     //obtenemos la fecha guardada en SharedPreferences.
-    String? fecha = _preferenciasService.obtenerUltimaApertura();
+    String? fecha = preferenciasService.obtenerUltimaApertura();
 
     //comprobamos que la pantalla siga abierta.
     if (!mounted) {
@@ -50,9 +50,9 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
   }
 
   //recuperamos el número de aperturas guardado.
-  void cargarNumeroAperturas(PreferenciasService _preferenciasService) {
+  void cargarNumeroAperturas(PreferenciasService preferenciasService) {
     //obtenemos el contador de SharedPreferences.
-    int numero = _preferenciasService.obtenerNumeroAperturas();
+    int numero = preferenciasService.obtenerNumeroAperturas();
 
     //actualizamos el número que aparece en pantalla.
     setState(() {

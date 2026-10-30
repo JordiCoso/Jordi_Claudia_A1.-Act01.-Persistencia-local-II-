@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:habitosapp/services/DataBaseHelper.dart';
 
 import 'screens/bienvenida.dart';
-import 'screens/registro_page.dart';
 import 'screens/principal.dart';
-import 'services/PreferenciasService.dart';
+import 'services/preferenciasservice.dart';
 
 import 'models/usuario.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //creamos el servicio de preferencias.
-  PreferenciasService _preferenciasService = await PreferenciasService.crear();
+  PreferenciasService preferenciasService = await PreferenciasService.crear();
   //aumentamos el número de veces que se abre la aplicación.
-  _preferenciasService.aumentarNumeroAperturar();
+  preferenciasService.aumentarNumeroAperturar();
 
   //guardamos la fecha y hora de la última apertura.
-  _preferenciasService.registrarApertura();
+  preferenciasService.registrarApertura();
 
   //iniciamos la aplicación con el servicio de preferencias.
-  runApp(MyApp(preferenciasService: _preferenciasService));
+  runApp(MyApp(preferenciasService: preferenciasService));
 }
 
 class MyApp extends StatefulWidget {
@@ -104,17 +102,17 @@ class _MyAppState extends State<MyApp> {
   }
 
   //comprobamos si debemos mostrar Bienvenida o Principal.
-  Widget comprobarInicio(PreferenciasService _preferenciasService) {
+  Widget comprobarInicio(PreferenciasService preferenciasService) {
     //recuperamos los datos del usuario.
-    Usuario _usuario = _preferenciasService.cargarUsuario();
+    Usuario usuario = preferenciasService.cargarUsuario();
 
     //si no tiene nombre o hábitos, mostramos Bienvenida.
     //si ya tiene datos guardados, mostramos Principal.
-    return (_usuario.nombre == '' || _usuario.numeroHabitos == 0)
-        ? Bienvenida(preferenciasService: _preferenciasService)
+    return (usuario.nombre == '' || usuario.numeroHabitos == 0)
+        ? Bienvenida(preferenciasService: preferenciasService)
         : Principal(
-            preferenciasService: _preferenciasService,
-            usuario: _usuario,
+            preferenciasService: preferenciasService,
+            usuario: usuario,
           );
   }
 }
