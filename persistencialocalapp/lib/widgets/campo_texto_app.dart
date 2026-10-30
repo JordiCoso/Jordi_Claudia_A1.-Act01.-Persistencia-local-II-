@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//se puede reutilizar para usuario, nombre, correo y contraseña. y ocultarTexto es flase por default pq no todos los campos son contraseñas
 class CampoTextoApp extends StatelessWidget {
   final String etiqueta; //para mostrar el nomnbre y el usuario...
   final TextEditingController controller; //para leer el texto.

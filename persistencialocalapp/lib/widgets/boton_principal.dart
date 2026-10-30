@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BotonPrincipal extends StatelessWidget {
+  //recibimos el texto q tendrá el botón y la función que queremos cuando el usuario pulse el boton
   final String texto;
   final VoidCallback pulsar;
 
