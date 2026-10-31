@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:habitosapp/services/databasehelper.dart';
 import 'package:habitosapp/widgets/boton_principal.dart';
+import 'package:intl/intl.dart';
 
 import '/widgets/campo_texto_app.dart';
 
@@ -34,7 +36,7 @@ class _RegistroPageState extends State<RegistroPage> {
 
   //comprobamos que no esté vacío, para todos los campos con el controller.
   //Usamos el setState para mostrar el mensaje de error si el campo queda vacío.
-  void registrarUsuario() {
+  Future<void> registrarUsuario() async {
     if (usuarioController.text.trim().isEmpty) {
       setState(() {
         mensajeError = 'El usuario no puede estar vacío';
@@ -65,7 +67,7 @@ class _RegistroPageState extends State<RegistroPage> {
 
     //comprobamos que el correo tenga @ para que sea válido.
     String email = emailController.text.trim();
-    if(!email.contains('@')) {
+    if (!email.contains('@')) {
       setState(() {
         mensajeError = 'El email no es válido';
       });
@@ -74,7 +76,29 @@ class _RegistroPageState extends State<RegistroPage> {
 
     if (contrasenaController.text.trim().isEmpty) {
       setState(() {
-        mensajeError = 'La contraseña no puede estar vacío';
+        mensajeError = 'La contraseña no puede estar vacía';
+      });
+      return;
+    }
+
+    Databasehelper database = await Databasehelper.crear();
+    //antes de registrar al uusario, comprobamos en sqflite q no exissta otro con el mismo nombre
+    bool usuarioExiste = await database.existeUsuario(
+      usuarioController.text.trim(),
+    );
+
+    if (usuarioExiste) {
+      setState(() {
+        mensajeError = 'Este nombre de usuario ya existe';
+      });
+      return;
+    }
+    //hacemos la misma comprobacion con el correo, para q no hayan dos usuarios con el mismo correo
+    bool emailExiste = await database.existeEmail(emailController.text.trim());
+
+    if (emailExiste) {
+      setState(() {
+        mensajeError = 'Este correo ya existe';
       });
       return;
     }
@@ -83,6 +107,26 @@ class _RegistroPageState extends State<RegistroPage> {
     setState(() {
       mensajeError = '';
     });
+
+    //obtenemos la fecha de creacion al registrar el usuario
+    String fechaCreacion = DateFormat('dd-MM-yyyy').format(DateTime.now());
+
+    //todos los nuevos usuarios tendran el rol de usuario. así no pueden escoger su rol
+    String rol = 'usuario';
+
+    //le pasamos los datos para poner en el usuario
+    await database.insertarUsuario(
+      usuarioController.text.trim(),
+      nombreController.text.trim(),
+      apellidoController.text.trim(),
+      emailController.text.trim(),
+      contrasenaController.text.trim(),
+      fechaCreacion,
+      rol,
+    );
+
+    if (!mounted) return;
+    Navigator.pop(context);
   }
 
   @override
@@ -118,9 +162,8 @@ class _RegistroPageState extends State<RegistroPage> {
             SizedBox(height: 24),
 
             //comprobamos si el mensaje de error tiene texto, si lo tiene muestra el mensaje de error.
-            if(mensajeError.isNotEmpty)
-              Text(mensajeError, style: TextStyle(color: Colors.red),
-              ),
+            if (mensajeError.isNotEmpty)
+              Text(mensajeError, style: TextStyle(color: Colors.red)),
 
             SizedBox(height: 24),
 

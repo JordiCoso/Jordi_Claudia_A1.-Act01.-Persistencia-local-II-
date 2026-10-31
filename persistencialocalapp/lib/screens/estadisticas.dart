@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '/services/PreferenciasService.dart';
+import '../services/preferenciasservice.dart';
+import '../widgets/dato_estadistica.dart';
 import '/models/habito.dart';
+
+import 'package:habitosapp/services/databasehelper.dart';
 
 class PantallaEstadisticas extends StatefulWidget {
   final PreferenciasService _preferenciasService;
@@ -22,6 +25,9 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
   //lista de habitos guardados,
   List<Habito> listaHabitos = [];
 
+  //va a almacenar los registros q recuperaremos de sqflite
+  List<Map<String, dynamic>> listaEstadisticas = [];
+
   //método que se ejecuta cuando se crea la pantalla.
   @override
   void initState() {
@@ -31,12 +37,14 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
     cargarUltimaApertura(widget._preferenciasService);
     cargarNumeroAperturas(widget._preferenciasService);
     listaHabitos = widget._preferenciasService.cargarHabitos();
+    //lo dejo comentado pq queda pendiente a conectarlo con sqflite
+    //cargarEstadisticas();
   }
 
   //recuperamos la última apertura de la aplicación.
-  void cargarUltimaApertura(PreferenciasService _preferenciasService) {
+  void cargarUltimaApertura(PreferenciasService preferenciasService) {
     //obtenemos la fecha guardada en SharedPreferences.
-    String? fecha = _preferenciasService.obtenerUltimaApertura();
+    String? fecha = preferenciasService.obtenerUltimaApertura();
 
     //comprobamos que la pantalla siga abierta.
     if (!mounted) {
@@ -50,13 +58,32 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
   }
 
   //recuperamos el número de aperturas guardado.
-  void cargarNumeroAperturas(PreferenciasService _preferenciasService) {
+  void cargarNumeroAperturas(PreferenciasService preferenciasService) {
     //obtenemos el contador de SharedPreferences.
-    int numero = _preferenciasService.obtenerNumeroAperturas();
+    int numero = preferenciasService.obtenerNumeroAperturas();
 
     //actualizamos el número que aparece en pantalla.
     setState(() {
       numeroApertura = numero;
+    });
+  }
+
+  //obtenemos estadisticas de un habito desde sqflite
+  Future<void> cargarEstadisticas() async {
+    Databasehelper databse =
+        await Databasehelper.crear(); //obtenemos la conexion con la bbdd
+
+    List<Map<String, dynamic>> estadisticas = [];
+
+    for (Habito habito in listaHabitos) {
+      final resultado = await databse.obtenerEstadisticas(habito.identificador);
+
+      estadisticas.addAll(resultado); //añadimos los registros q se han encontrado a la lista sin borrar los otros
+    }
+
+    if (!mounted) return;
+    setState(() {
+      listaEstadisticas = estadisticas; //guarda el resultado y se actualiza
     });
   }
 
@@ -115,7 +142,6 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
 
                   SizedBox(height: 16),
 
-                  //TODO: mostrar aquí las estadísticas reales.
                   if (listaHabitos.isEmpty)
                     Center(
                       child: Text('Todavía no has empezado ningún hábito.'),
@@ -132,11 +158,16 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(
-                                      'Racha: ${habito.obtenerRacha()} días',
+                                    DatoEstadistica(
+                                      titulo: 'Racha actual',
+                                      valor: '${habito.obtenerRacha()} días',
                                     ),
-                                    Text(
-                                      'Total: ${habito.diasCompletados} días',
+
+                                    SizedBox(height: 8),
+
+                                    DatoEstadistica(
+                                      titulo: 'Días completados',
+                                      valor: '${habito.diasCompletados} días',
                                     ),
                                   ],
                                 ),
