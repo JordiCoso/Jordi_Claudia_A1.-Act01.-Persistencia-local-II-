@@ -1,74 +1,79 @@
-import 'dart:convert';
 import 'dart:ui';
 
 class Habito {
   late int identificador;
+  late int identificadorEstadisticas;
   late String nombre;
+  late String nombreUsuario;
   late Color color;
   late DateTime fechaCompletado;
   bool completado = false;
+  bool pendingBorrarse = false;
   int rachaActual = 0;
   int diasCompletados = 0;
 
-  Habito(this.identificador, this.nombre, this.color, this.fechaCompletado);
+  Habito(
+    this.identificador,
+    this.nombre,
+    this.color,
+    this.fechaCompletado,
+  ); // TODO
 
-  /* Esto es un constructor ya que queremos crear un habito del json.
-   * Asi evitamos que se pueda crear un habito vacio.
-   * Siempre deberiamos querer crear uno de un json
-   * o con el constructor de arriba.
-   */
-  Habito.fromJson(String json) {
-    // El json devuelve un dynamic que en este caso es una lista con llaves string.
-    final data = jsonDecode(json);
-
-    identificador = data['identificador'];
-    nombre = data['nombre'];
-    /* Json no puede guardar un tipo color asi que hicimos una lista.
-     * El orden es 0 = alpha, 1 = rojo, 2 = verde, 3 = azul.
-     */
-    color = Color.from(
-      alpha: data['color'][0],
-      red: data['color'][1],
-      green: data['color'][2],
-      blue: data['color'][3],
-      colorSpace: ColorSpace.sRGB, // Es el que Color() tiene predeterminado.
-    );
-
-    // Tenemos que usar DateTime para pasar el string a un DateTime.
-    fechaCompletado = DateTime.parse(data['fechaCompletado']);
-
-    completado = data['completado'];
-    rachaActual = data['rachaActual'] ?? 0;
-    diasCompletados = data['diasCompletados'] ?? 0;
+  Habito.fromBBDD({
+    required int hid,
+    required String nombreHabito,
+    required String colorString,
+    required int completadoInt,
+    required int eid,
+    required String fechaCompletadoString,
+    required this.rachaActual,
+    required this.diasCompletados,
+    required this.nombreUsuario,
+  }) {
+    identificador = hid;
+    nombre = nombreHabito;
+    color = _convertirStringAColor(colorString);
+    completado = completadoInt as bool;
+    identificadorEstadisticas = eid;
+    fechaCompletado = DateTime.parse(fechaCompletadoString);
   }
 
-  String toJson() {
-    // Tenemos que convertir el color a una lista de valores.
-    final colorJsonable = _convertirAJsonCompatible();
+  Color _convertirStringAColor(String color) {
+    List<String> argb = color.split('|');
 
-    final data = {
-      'identificador': identificador,
-      'nombre': nombre,
-      'color': colorJsonable,
-      'fechaCompletado': fechaCompletado.toString(),
-      'completado': completado,
-      'rachaActual': rachaActual,
-      'diasCompletados': diasCompletados,
-    };
+    late final double a;
+    late final double r;
+    late final double g;
+    late final double b;
 
-    return jsonEncode(data);
+    for (String valor in argb) {
+      switch (valor) {
+        case 'a':
+          a = double.parse(valor);
+          break;
+        case 'r':
+          r = double.parse(valor);
+          break;
+        case 'g':
+          g = double.parse(valor);
+          break;
+        case 'b':
+          b = double.parse(valor);
+          break;
+
+        default:
+      }
+    }
+
+    return Color.from(alpha: a, red: r, green: g, blue: b);
   }
 
-  // Para convertirlo a una lista añadimos cada parametro de color uno a uno.
-  List<double> _convertirAJsonCompatible() {
-    List<double> colorJsonable = [];
-    // Hay que recordar el orden cuando lo extraigamos.
-    colorJsonable.add(color.a);
-    colorJsonable.add(color.r);
-    colorJsonable.add(color.g);
-    colorJsonable.add(color.b);
-
-    return colorJsonable;
+  String convertirColorAString(Color color) {
+    final String a = color.a.toString();
+    final String r = color.r.toString();
+    final String g = color.g.toString();
+    final String b = color.b.toString();
+    return '$a|$r|$g|$b';
   }
 
   void actualizarRacha() {

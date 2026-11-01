@@ -52,24 +52,6 @@ class PreferenciasService {
     return usuario;
   }
 
-  void guardarHabitos(List<Habito> listaHabitos) {
-    List<String> jsonHabitos = [];
-    for (Habito habito in listaHabitos) {
-      jsonHabitos.add(habito.toJson());
-    }
-
-    _preferencias.setStringList("habitos", jsonHabitos);
-  }
-
-  List<Habito> cargarHabitos() {
-    List<String> jsonHabitos = _preferencias.getStringList("habitos") ?? [];
-    List<Habito> habitos = [];
-    for (String json in jsonHabitos) {
-      habitos.add(Habito.fromJson(json));
-    }
-    return habitos;
-  }
-
   /// Identificador de fecha guardada.
   static const String nombreDatoFecha = 'ultimaApertura';
 
