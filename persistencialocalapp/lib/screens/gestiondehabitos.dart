@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:habitosapp/services/databasehelper.dart';
+import 'package:habitosapp/widgets/boton_principal.dart';
+import 'package:habitosapp/widgets/campo_texto_app.dart';
 
 import '../services/preferenciasservice.dart';
 
 import '../models/habito.dart';
 import '../models/usuario.dart';
-
-// Un enum para que sea mas legible que significa cada codigo de color.
-enum NombreColores { naranja, azul, verde }
+import '../widgets/boton_selecion_color.dart';
+import '../widgets/tarjeta_habito.dart';
 
 class Gestiondehabitos extends StatefulWidget {
   // Nos pasan usuario y preferencias service
@@ -22,6 +24,9 @@ class Gestiondehabitos extends StatefulWidget {
   @override
   State<Gestiondehabitos> createState() => _GestiondehabitosState();
 }
+
+// Un enum para que sea mas legible que significa cada codigo de color.
+enum NombreColores { naranja, azul, verde }
 
 class _GestiondehabitosState extends State<Gestiondehabitos> {
   // La lista de colores el cual usaremos el enum para que se vea cual es.
@@ -74,95 +79,76 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(horizontal: 10.0),
                     margin: EdgeInsets.only(bottom: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _darControllador(index),
-                            enabled: _darEditable(index),
-                            onEditingComplete: () {
-                              setState(() {
-                                editables[index] = !editables[index]!;
-                                _editarHabito(index);
-                              });
-                            },
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: CampoTextoApp(
+                                etiqueta: 'Habito #$index',
+                                controller: _darControllador(index),
+                                enabled: _darEditable(index),
+                                onEditingComplete: () => _editarHabito(index),
+                              ),
                             ),
-                            style: TextStyle(color: listaHabitos[index].color),
-                          ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: TarjetaHabito(
+                                color:
+                                    listaColores[NombreColores.naranja.index],
+                                completado: false,
+                                editar: () => _editarHabito(index),
+                                eliminar: () => _borrarHabito(index),
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _cambiarColorHabito(
-                                index,
-                                listaColores[NombreColores.naranja.index],
-                              );
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                listaColores[NombreColores.naranja.index],
-                          ),
-                          child: Text(''),
-                        ),
-                        SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _cambiarColorHabito(
-                                index,
-                                listaColores[NombreColores.azul.index],
-                              );
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                listaColores[NombreColores.azul.index],
-                          ),
-                          child: Text(''),
-                        ),
-                        SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _cambiarColorHabito(
-                                index,
-                                listaColores[NombreColores.verde.index],
-                              );
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                listaColores[NombreColores.verde.index],
-                          ),
-                          child: Text(''),
-                        ),
-                        SizedBox(width: 10),
-                        ElevatedButton(
-                          child: Text('Edit'),
-                          onPressed: () {
-                            setState(() {
-                              editables[index] = !editables[index]!;
-                              if (!editables[index]!) _editarHabito(index);
-                            });
-                          },
-                        ),
-                        SizedBox(width: 10),
-                        ElevatedButton(
-                          child: Text('Remove'),
-                          onPressed: () {
-                            setState(() {
-                              // Lo borro asi tengo uno limpio cada vez que cree uno nuevo
-                              textEditingControllers[index]?.dispose();
-                              // Si no lo borro de la lista intentara usar el controlador que ha hecho .dispose()
-                              textEditingControllers.remove(index);
-                              listaHabitos.removeAt(index);
-                            });
-                          },
+                        Row(
+                          children: [
+                            Expanded(
+                              child: BotonSelecionColor(
+                                color:
+                                    listaColores[NombreColores.naranja.index],
+                                pulsar: () {
+                                  setState(() {
+                                    _cambiarColorHabito(
+                                      index,
+                                      listaColores[NombreColores.naranja.index],
+                                    );
+                                  });
+                                },
+                              ),
+                            ),
+                            Expanded(
+                              child: BotonSelecionColor(
+                                color: listaColores[NombreColores.azul.index],
+                                pulsar: () {
+                                  setState(() {
+                                    _cambiarColorHabito(
+                                      index,
+                                      listaColores[NombreColores.azul.index],
+                                    );
+                                  });
+                                },
+                              ),
+                            ),
+                            Expanded(
+                              child: BotonSelecionColor(
+                                color: listaColores[NombreColores.verde.index],
+                                pulsar: () {
+                                  setState(() {
+                                    _cambiarColorHabito(
+                                      index,
+                                      listaColores[NombreColores.verde.index],
+                                    );
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -170,9 +156,9 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
                 },
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                child: Text('Crear'),
-                onPressed: () {
+              BotonPrincipal(
+                texto: 'Crear',
+                pulsar: () {
                   setState(() {
                     listaHabitos.add(
                       Habito(
@@ -185,18 +171,18 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
                   });
                 },
               ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                child: Text('Guardar'),
-                onPressed: () {
+              SizedBox(height: 20),
+              BotonPrincipal(
+                texto: 'Guardar',
+                pulsar: () {
                   widget._preferenciasService.guardarHabitos(listaHabitos);
                   Navigator.pop(context);
                 },
               ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                child: Text('Cancelar'),
-                onPressed: () {
+              SizedBox(height: 20),
+              BotonPrincipal(
+                texto: 'Cancelar',
+                pulsar: () {
                   Navigator.pop(context);
                 },
               ),
@@ -205,6 +191,23 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
         ),
       ),
     );
+  }
+
+  void _editarHabito(int index) {
+    setState(() {
+      editables[index] = !editables[index]!;
+      _confirmarEditarHabito(index);
+    });
+  }
+
+  void _borrarHabito(int index) {
+    setState(() {
+      // Lo borro asi tengo uno limpio cada vez que cree uno nuevo
+      textEditingControllers[index]?.dispose();
+      // Si no lo borro de la lista intentara usar el controlador que ha hecho .dispose()
+      textEditingControllers.remove(index);
+      listaHabitos.removeAt(index);
+    });
   }
 
   // Por cada TextField le asignamos un controlador dinamicamente.
@@ -231,7 +234,7 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
   }
 
   // Una vez ha sido editado tenemos que dar el nuevo valor del controllador a la listaHabitos.
-  void _editarHabito(int index) {
+  void _confirmarEditarHabito(int index) {
     Habito habito = listaHabitos[index];
 
     habito.nombre = textEditingControllers[index]?.text ?? '';
@@ -241,5 +244,9 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
 
   void _cambiarColorHabito(int index, Color color) {
     listaHabitos[index].color = color;
+  }
+
+  void _iconoSeleccion(Icon? icon, int index) async {
+    Databasehelper helper = await Databasehelper.crear();
   }
 }
