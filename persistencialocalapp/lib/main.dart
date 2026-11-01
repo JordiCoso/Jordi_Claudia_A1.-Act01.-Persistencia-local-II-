@@ -43,6 +43,7 @@ class _MyAppState extends State<MyApp> {
 
           builder: (context, tamanoLetra, child) {
             return MaterialApp(
+              debugShowCheckedModeBanner: false,
               title: 'HabitosApp',
 
               //colores de la aplicación en modo claro.
@@ -110,9 +111,6 @@ class _MyAppState extends State<MyApp> {
     //si ya tiene datos guardados, mostramos Principal.
     return (usuario.nombre == '' || usuario.numeroHabitos == 0)
         ? Bienvenida(preferenciasService: preferenciasService)
-        : Principal(
-            preferenciasService: preferenciasService,
-            usuario: usuario,
-          );
+        : Principal(preferenciasService: preferenciasService, usuario: usuario);
   }
 }
