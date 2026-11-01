@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitosapp/services/databasehelper.dart';
 
 import 'screens/bienvenida.dart';
 import 'screens/principal.dart';
@@ -16,15 +17,27 @@ Future<void> main() async {
   //guardamos la fecha y hora de la última apertura.
   preferenciasService.registrarApertura();
 
+  Databasehelper databasehelper = await Databasehelper.crear();
+
   //iniciamos la aplicación con el servicio de preferencias.
-  runApp(MyApp(preferenciasService: preferenciasService));
+  runApp(
+    MyApp(
+      preferenciasService: preferenciasService,
+      databasehelper: databasehelper,
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
   //servicio que utilizamos para recuperar las preferencias.
   final PreferenciasService _preferenciasService;
+  final Databasehelper _databasehelper;
 
-  const MyApp({super.key, required this._preferenciasService});
+  const MyApp({
+    super.key,
+    required this._preferenciasService,
+    required this._databasehelper,
+  });
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -94,7 +107,10 @@ class _MyAppState extends State<MyApp> {
               },
 
               //comprobamos si el usuario ya se ha registrado.
-              home: comprobarInicio(widget._preferenciasService),
+              home: comprobarInicio(
+                widget._preferenciasService,
+                widget._databasehelper,
+              ),
             );
           },
         );
@@ -103,14 +119,21 @@ class _MyAppState extends State<MyApp> {
   }
 
   //comprobamos si debemos mostrar Bienvenida o Principal.
-  Widget comprobarInicio(PreferenciasService preferenciasService) {
+  Widget comprobarInicio(
+    PreferenciasService preferenciasService,
+    Databasehelper databasehelper,
+  ) {
     //recuperamos los datos del usuario.
     Usuario usuario = preferenciasService.cargarUsuario();
 
     //si no tiene nombre o hábitos, mostramos Bienvenida.
     //si ya tiene datos guardados, mostramos Principal.
     return (usuario.nombre == '' || usuario.numeroHabitos == 0)
-        ? Bienvenida(preferenciasService: preferenciasService)
-        : Principal(preferenciasService: preferenciasService, usuario: usuario);
+        ? Bienvenida(preferenciasService: preferenciasService, databasehelper: databasehelper)
+        : Principal(
+            preferenciasService: preferenciasService,
+            databasehelper: databasehelper,
+            usuario: usuario,
+          );
   }
 }

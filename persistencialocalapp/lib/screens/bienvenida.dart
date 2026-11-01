@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitosapp/services/databasehelper.dart';
 
 import '/models/usuario.dart';
 import '/screens/principal.dart';
@@ -7,8 +8,13 @@ import '../services/preferenciasservice.dart';
 class Bienvenida extends StatefulWidget {
   // Nos pasan el servicio.
   final PreferenciasService _preferenciasService;
+  final Databasehelper _databasehelper;
 
-  const Bienvenida({super.key, required this._preferenciasService});
+  const Bienvenida({
+    super.key,
+    required this._preferenciasService,
+    required this._databasehelper,
+  });
 
   @override
   State<Bienvenida> createState() => _BienvenidaState();
@@ -17,7 +23,6 @@ class Bienvenida extends StatefulWidget {
 class _BienvenidaState extends State<Bienvenida> {
   final _nombreController = TextEditingController();
   final _numeroController = TextEditingController();
-
 
   @override
   void dispose() {
@@ -87,6 +92,7 @@ class _BienvenidaState extends State<Bienvenida> {
       MaterialPageRoute<void>(
         builder: (context) => Principal(
           preferenciasService: widget._preferenciasService,
+          databasehelper: widget._databasehelper,
           usuario: usuario,
         ),
       ),
@@ -100,7 +106,6 @@ class _BienvenidaState extends State<Bienvenida> {
    * en dart es mas un placeholder que algo no usado pero me sirve.
    */
   void _validarInput(_) {
-
     // Asumimos que no es valido avanzar hasta que se demuestre lo contrario.
     _validoAvanzar = false;
     if (_comprobarNombre()) {

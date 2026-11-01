@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/databasehelper.dart';
 import '../services/preferenciasservice.dart';
 import '../models/habito.dart';
 import '../models/usuario.dart';
@@ -10,11 +11,13 @@ import 'gestiondehabitos.dart';
 class Principal extends StatefulWidget {
   // Nos pasan usuario y preferencias service
   final PreferenciasService _preferenciasService;
+  final Databasehelper _databasehelper;
   final Usuario _usuario;
 
   const Principal({
     super.key,
     required this._preferenciasService,
+    required this._databasehelper,
     required this._usuario,
   });
 
@@ -92,6 +95,7 @@ class _PrincipalState extends State<Principal> {
                     MaterialPageRoute(
                       builder: (context) => PantallaAjustes(
                         preferenciasService: widget._preferenciasService,
+                        databasehelper: widget._databasehelper,
                       ),
                     ),
                   );
@@ -128,6 +132,7 @@ class _PrincipalState extends State<Principal> {
       MaterialPageRoute<void>(
         builder: (context) => Gestiondehabitos(
           preferenciasService: widget._preferenciasService,
+          databasehelper: widget._databasehelper,
           usuario: widget._usuario,
         ),
       ),

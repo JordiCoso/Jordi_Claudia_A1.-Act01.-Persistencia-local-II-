@@ -13,11 +13,13 @@ import '../widgets/tarjeta_habito.dart';
 class Gestiondehabitos extends StatefulWidget {
   // Nos pasan usuario y preferencias service
   final PreferenciasService _preferenciasService;
+  final Databasehelper _databasehelper;
   final Usuario _usuario;
 
   const Gestiondehabitos({
     super.key,
     required this._preferenciasService,
+    required this._databasehelper,
     required this._usuario,
   });
 
@@ -175,7 +177,7 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
               BotonPrincipal(
                 texto: 'Guardar',
                 pulsar: () {
-                  widget._preferenciasService.guardarHabitos(listaHabitos);
+                  widget._databasehelper.guardarHabitos(listaHabitos);
                   Navigator.pop(context);
                 },
               ),
