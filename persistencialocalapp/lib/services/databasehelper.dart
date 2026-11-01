@@ -4,10 +4,16 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Databasehelper {
+  /// La instancia unica de databasehelper
   static Databasehelper? _databasehelper;
 
+  /// La base de datos unica para uso interno.
+  late Database _baseDeDatos;
+
+  /// Constructor privado para evitar que se pueda llamar a new.
   Databasehelper._crear();
 
+  /// Constructor publico singleton asegura que solo hay una instancia de esta clase.
   static Future<Databasehelper> crear() async {
     if (_databasehelper != null) {
       return await Future.value(_databasehelper);
@@ -15,24 +21,28 @@ class Databasehelper {
 
     var inicializando = Databasehelper._crear();
 
-    inicializando._basedatos = await inicializando._getbasedatos;
+    inicializando._baseDeDatos = await inicializando._getInstanciaBD;
 
     _databasehelper = inicializando;
 
     return inicializando;
   }
 
-  Database? _basedatos;
+  /// NO llamar, solo usa para hacer el singleton.
+  Database? _comprobacionInstanciaBD;
 
-  Future<Database> get _getbasedatos async {
-    if (_basedatos != null) {
-      return _basedatos!;
+  /// NO llamar, solo se usa en el constructor [crear].
+  Future<Database> get _getInstanciaBD async {
+    if (_comprobacionInstanciaBD != null) {
+      return _comprobacionInstanciaBD!;
     }
 
-    _basedatos = await _generarBase();
-    return _basedatos!;
+    _comprobacionInstanciaBD = await _generarBase();
+    return _comprobacionInstanciaBD!;
   }
 
+  /// Crea el archivo y la primera vez usa [creacionBaseDatos] para
+  /// ejecutar los SQL de creación de tablas.
   Future<Database> _generarBase() async {
     final ruta = join(await getDatabasesPath(), 'habitos.db');
 
@@ -56,7 +66,7 @@ class Databasehelper {
       'usuario TEXT PRIMARY KEY, '
       'nombre TEXT NOT NULL,'
       'apellidos TEXT NOT NULL,'
-      'email TEXT NOT NULL UNIQUE,' //lo pongo unique para q no se pueda registrar dos usuarios con el mismo correo.
+      'email TEXT NOT NULL UNIQUE,' // Lo pongo unique para q no se pueda registrar dos usuarios con el mismo correo.
       'contrasena TEXT NOT NULL,'
       'fecha_creacion TEXT NOT NULL,'
       'rol TEXT NOT NULL)',
@@ -81,8 +91,7 @@ class Databasehelper {
     String fechaCreacion,
     String rol,
   ) async {
-    Database db = await _getbasedatos;
-    int resultado = await db.insert('usuarios', {
+    int resultado = await _baseDeDatos.insert('usuarios', {
       'usuario': usuario,
       'nombre': nombre,
       'apellidos': apellidos,
@@ -97,9 +106,7 @@ class Databasehelper {
 
   //vamos a comprobar si el usuario existe
   Future<bool> existeUsuario(String usuario) async {
-    Database db = await _getbasedatos;
-
-    final resultado = await db.query(
+    final resultado = await _baseDeDatos.query(
       'usuarios', //usamos el query para buscar un usuario
       where: 'usuario = ?', //con el ? es el valor q estamos buscando
       whereArgs: [usuario],
@@ -110,9 +117,7 @@ class Databasehelper {
 
   //comprobamos si existe el correo o no
   Future<bool> existeEmail(String email) async {
-    Database db = await _getbasedatos;
-
-    final resultado = await db.query(
+    final resultado = await _baseDeDatos.query(
       'usuarios',
       where: 'email = ?',
       whereArgs: [email],
@@ -128,9 +133,7 @@ class Databasehelper {
     int diasCompletados,
     String? fechaCompletado,
   ) async {
-    Database db = await _getbasedatos;
-
-    int resultado = await db.insert('estadisticas', {
+    int resultado = await _baseDeDatos.insert('estadisticas', {
       'habito_id': habitoId,
       'racha_actual': rachaActual,
       'dias_completados': diasCompletados,
@@ -140,9 +143,7 @@ class Databasehelper {
   }
 
   Future<List<Map<String, dynamic>>> obtenerEstadisticas(int habitoId) async {
-    Database db = await _getbasedatos;
-
-    final resultado = await db.query(
+    final resultado = await _baseDeDatos.query(
       'estadisticas',
       where: 'habito_id = ?',
       whereArgs: [habitoId],
@@ -161,9 +162,7 @@ class Databasehelper {
     int diasCompletados,
     String? fechaCompletado,
   ) async {
-    Database db = await _getbasedatos;
-
-    int resultado = await db.update(
+    int resultado = await _baseDeDatos.update(
       'estadisticas',
       {
         'racha_actual': rachaActual,
