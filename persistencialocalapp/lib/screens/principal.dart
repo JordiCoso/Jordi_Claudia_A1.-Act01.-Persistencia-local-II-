@@ -26,8 +26,13 @@ class Principal extends StatefulWidget {
 }
 
 class _PrincipalState extends State<Principal> {
-  // Cargamos la lista de habitos.
-  late List<Habito> listaHabitos = widget._preferenciasService.cargarHabitos();
+  late List<Habito> listaHabitos;
+
+  @override
+  void initState() async {
+    super.initState();
+    listaHabitos = await widget._databasehelper.cargarHabitos(widget._usuario.nombre, widget._usuario.rol);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,8 +143,11 @@ class _PrincipalState extends State<Principal> {
       ),
     );
     // Cuando vuelva cargamos los datos nuevos y remplazamos.
-    setState(() {
-      listaHabitos = widget._preferenciasService.cargarHabitos();
+    setState(() async {
+      listaHabitos = await widget._databasehelper.cargarHabitos(
+        widget._usuario.nombre,
+        widget._usuario.rol,
+      );
     });
   }
 
@@ -163,7 +171,7 @@ class _PrincipalState extends State<Principal> {
       habito.completado = true;
 
       // Una vez esta hecho los cambios guardamos;
-      widget._preferenciasService.guardarHabitos(listaHabitos);
+      widget._databasehelper.guardarHabitos(listaHabitos);
     });
   }
 

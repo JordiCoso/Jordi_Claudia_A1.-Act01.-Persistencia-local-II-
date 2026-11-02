@@ -105,8 +105,8 @@ class Databasehelper {
       'CREATE TABLE $tablaHabitos ('
       '$columnaHabitosId INTEGER PRIMARY KEY AUTOINCREMENT, '
       '$columnaHabitosNombre TEXT NOT NULL, '
-      '$columnaHabitosColor TEXT NOT NULL, ' // Lo guardo como texto porque es hexadecimal
-      '$columnaHabitosCompletado TEXT NOT NULL, '
+      '$columnaHabitosColor TEXT NOT NULL, ' // Lo guardo como texto para almacenar los distintos colores juntos.
+      '$columnaHabitosCompletado INTEGER NOT NULL, '
       '$columnaHabitosUsuarioFK TEXT NOT NULL, '
       'FOREIGN KEY ($columnaHabitosUsuarioFK) REFERENCES $tablaUsuarios($columnaUsuariosUsuario) ON DELETE CASCADE)',
     );
@@ -172,25 +172,30 @@ class Databasehelper {
 
   //guardamos las estadisticas
   Future<int> insertarEstadisticas(
-    int habitoId,
+    String? fechaCompletado,
     int rachaActual,
     int diasCompletados,
-    String? fechaCompletado,
+    int habitoId,
+    String nombreUsuario,
   ) async {
     int resultado = await _baseDeDatos.insert(tablaEstadisticas, {
-      columnaEstadisticasHabitoidFK: habitoId,
+      columnaEstadisticasFechacompletado: fechaCompletado,
       columnaEstadisticasRachaactual: rachaActual,
       columnaEstadisticasDiascompletados: diasCompletados,
-      columnaEstadisticasFechacompletado: fechaCompletado,
+      columnaEstadisticasHabitoidFK: habitoId,
+      columnaEstadisticasUsuarioFK: nombreUsuario,
     });
     return resultado;
   }
 
-  Future<List<Map<String, dynamic>>> obtenerEstadisticas(int habitoId) async {
+  Future<List<Map<String, dynamic>>> obtenerEstadisticas(
+    String usuario,
+    bool esAdmin,
+  ) async {
     final resultado = await _baseDeDatos.query(
       tablaEstadisticas,
-      where: '$columnaEstadisticasHabitoidFK = ?',
-      whereArgs: [habitoId],
+      where: esAdmin ? null : '$columnaEstadisticasUsuarioFK = ?',
+      whereArgs: esAdmin ? null : [usuario],
     );
 
     return resultado;
@@ -231,17 +236,16 @@ class Databasehelper {
         int hid = await _baseDeDatos.insert(tablaHabitos, {
           columnaHabitosNombre: habito.nombre,
           columnaHabitosColor: habito.convertirColorAString(habito.color),
-          columnaHabitosCompletado: habito.completado as int,
+          columnaHabitosCompletado: habito.completado ? 1 : 0,
           columnaHabitosUsuarioFK: habito.nombreUsuario,
         });
-        await _baseDeDatos.insert(tablaEstadisticas, {
-          columnaEstadisticasId: habito.identificadorEstadisticas,
-          columnaEstadisticasFechacompletado: habito.fechaCompletado.toString(),
-          columnaEstadisticasRachaactual: habito.rachaActual,
-          columnaEstadisticasDiascompletados: habito.diasCompletados,
-          columnaEstadisticasHabitoidFK: hid,
-          columnaEstadisticasUsuarioFK: habito.nombreUsuario,
-        });
+        await insertarEstadisticas(
+          habito.fechaCompletado.toString(),
+          habito.rachaActual,
+          habito.diasCompletados,
+          hid,
+          habito.nombreUsuario,
+        );
       } else {
         if (habito.pendingBorrarse) {
           await _baseDeDatos.delete(
@@ -260,43 +264,36 @@ class Databasehelper {
             {
               columnaHabitosNombre: habito.nombre,
               columnaHabitosColor: habito.convertirColorAString(habito.color),
-              columnaHabitosCompletado: habito.completado as int,
+              columnaHabitosCompletado: habito.completado ? 1 : 0,
             },
             where: '$columnaHabitosId = ?',
             whereArgs: [habito.identificador],
           );
-          await _baseDeDatos.update(
-            tablaEstadisticas,
-            {
-              columnaEstadisticasFechacompletado: habito.fechaCompletado
-                  .toString(),
-              columnaEstadisticasRachaactual: habito.rachaActual,
-              columnaEstadisticasDiascompletados: habito.diasCompletados,
-            },
-            where: '$columnaEstadisticasHabitoidFK = ?',
-            whereArgs: [habito.identificador],
+          await actualizarEstadisticas(
+            habito.identificador,
+            habito.rachaActual,
+            habito.diasCompletados,
+            habito.fechaCompletado.toString(),
           );
         }
       }
     }
   }
 
-  Future<List<Habito>> cargarHabitos(String usuario) async {
+  Future<List<Habito>> cargarHabitos(String usuario, String rol) async {
     List<Habito> habitos = [];
+
+    bool esAdmin = rol.toLowerCase() == 'admin';
 
     final List<Map<String, Object?>> keyValueHabitosIncompleto =
         await _baseDeDatos.query(
           tablaHabitos,
-          where: '$columnaHabitosUsuarioFK = ?',
-          whereArgs: [usuario],
+          where: esAdmin ? null : '$columnaHabitosUsuarioFK = ?',
+          whereArgs: esAdmin ? null : [usuario],
         );
 
-    final List<Map<String, Object?>> keyValueEstadisticas = await _baseDeDatos
-        .query(
-          tablaEstadisticas,
-          where: '$columnaEstadisticasUsuarioFK = ?',
-          whereArgs: [usuario],
-        );
+    final List<Map<String, Object?>> keyValueEstadisticas =
+        await obtenerEstadisticas(usuario, esAdmin);
 
     /// Lista unificada de datos sobre habito.
     List<Map<String, Object?>> keyValueHabitos =
@@ -308,7 +305,6 @@ class Databasehelper {
       late String colorString;
       late int completadoInt;
 
-      late int eid;
       late String fechaCompletadoString;
       late int rachaActual;
       late int diasCompletados;
@@ -328,9 +324,6 @@ class Databasehelper {
             break;
           case columnaHabitosCompletado:
             completadoInt = valor as int;
-            break;
-          case columnaEstadisticasId:
-            eid = valor as int;
             break;
           case columnaEstadisticasFechacompletado:
             fechaCompletadoString = valor as String;
@@ -354,7 +347,6 @@ class Databasehelper {
         nombreHabito: nombreHabito,
         colorString: colorString,
         completadoInt: completadoInt,
-        eid: eid,
         fechaCompletadoString: fechaCompletadoString,
         rachaActual: rachaActual,
         diasCompletados: diasCompletados,

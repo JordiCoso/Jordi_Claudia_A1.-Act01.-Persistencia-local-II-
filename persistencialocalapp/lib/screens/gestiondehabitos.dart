@@ -3,6 +3,7 @@ import 'package:habitosapp/services/databasehelper.dart';
 import 'package:habitosapp/widgets/boton_principal.dart';
 import 'package:habitosapp/widgets/campo_texto_app.dart';
 
+import '../models/colores.dart';
 import '../services/preferenciasservice.dart';
 
 import '../models/habito.dart';
@@ -28,15 +29,10 @@ class Gestiondehabitos extends StatefulWidget {
 }
 
 // Un enum para que sea mas legible que significa cada codigo de color.
-enum NombreColores { naranja, azul, verde }
+
 
 class _GestiondehabitosState extends State<Gestiondehabitos> {
-  // La lista de colores el cual usaremos el enum para que se vea cual es.
-  final List<Color> listaColores = [
-    Color(0xFFFFC067), // Naranja
-    Color(0xFF6CCCC4), // Azul
-    Color(0xFF807B44), // Verde
-  ];
+
 
   late List<Habito> listaHabitos = widget._preferenciasService.cargarHabitos();
 
