@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:habitosapp/models/iconos.dart';
 
@@ -18,8 +17,11 @@ class Habito {
     this.identificador,
     this.nombre,
     this.color,
-    this.fechaCompletado,
-  ); // TODO
+    this.fechaCompletado, {
+    this.nombreUsuario = '',
+  }) {
+    icono = opcionesIconos[0]; //cuando se crea un habito nuevo, se pone un icono por default
+  }
 
   Habito.fromBBDD({
     required int iconoInt,
