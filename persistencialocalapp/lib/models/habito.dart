@@ -1,8 +1,10 @@
-import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:habitosapp/models/iconos.dart';
 
 class Habito {
+  late Icon icono;
   late int identificador;
-  late int identificadorEstadisticas;
   late String nombre;
   late String nombreUsuario;
   late Color color;
@@ -20,21 +22,33 @@ class Habito {
   ); // TODO
 
   Habito.fromBBDD({
+    required int iconoInt,
     required int hid,
     required String nombreHabito,
     required String colorString,
     required int completadoInt,
-    required int eid,
     required String fechaCompletadoString,
     required this.rachaActual,
     required this.diasCompletados,
     required this.nombreUsuario,
   }) {
+    // Icono se enviara como un INTEGER
+    switch (iconoInt) {
+      case 0:
+        icono = Icon(Icons.water_drop);
+        break;
+      case 1:
+        icono = Icon(Icons.directions_run);
+        break;
+      case 2:
+        icono = Icon(Icons.grass);
+        break;
+    }
+
     identificador = hid;
     nombre = nombreHabito;
     color = _convertirStringAColor(colorString);
-    completado = completadoInt as bool;
-    identificadorEstadisticas = eid;
+    completado = completadoInt == 1;
     fechaCompletado = DateTime.parse(fechaCompletadoString);
   }
 
@@ -46,19 +60,19 @@ class Habito {
     late final double g;
     late final double b;
 
-    for (String valor in argb) {
-      switch (valor) {
-        case 'a':
-          a = double.parse(valor);
+    for (int i = 0; i < argb.length; i++) {
+      switch (i) {
+        case 0:
+          a = double.parse(argb[i]);
           break;
-        case 'r':
-          r = double.parse(valor);
+        case 1:
+          r = double.parse(argb[i]);
           break;
-        case 'g':
-          g = double.parse(valor);
+        case 2:
+          g = double.parse(argb[i]);
           break;
-        case 'b':
-          b = double.parse(valor);
+        case 3:
+          b = double.parse(argb[i]);
           break;
 
         default:

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../models/iconos.dart';
+
 class TarjetaHabito extends StatefulWidget {
   final String nombre;
   final Color color;
@@ -11,9 +13,7 @@ class TarjetaHabito extends StatefulWidget {
   final VoidCallback editar;
   final VoidCallback eliminar;
 
-  Icon? valor;
-
-  TarjetaHabito({
+  const TarjetaHabito({
     super.key,
     this.nombre = '',
     required this.color,
@@ -36,37 +36,30 @@ class TarjetaHabito extends StatefulWidget {
   State<TarjetaHabito> createState() => _TarjetaHabitoState();
 }
 
-enum Iconos { gota, correr, hierba }
-
 class _TarjetaHabitoState extends State<TarjetaHabito> {
-  final List<Icon> opcionesIconos = <Icon>[
-    Icon(Icons.water_drop),
-    Icon(Icons.directions_run),
-    Icon(Icons.grass),
-  ];
+  late DropdownMenuItem<Icon> menuGota = DropdownMenuItem<Icon>(
+    value: opcionesIconos[NombreIconos.gota.index],
+    child: menuCorrer,
+  );
+  late DropdownMenuItem<Icon> menuCorrer = DropdownMenuItem<Icon>(
+    value: opcionesIconos[NombreIconos.correr.index],
+    child: menuHierba,
+  );
+  late DropdownMenuItem<Icon> menuHierba = DropdownMenuItem<Icon>(
+    value: opcionesIconos[NombreIconos.hierba.index],
+    child: menuHierba,
+  );
+
+  Icon? valor = opcionesIconos[NombreIconos.gota.index];
 
   @override
   Widget build(BuildContext context) {
-    widget.valor = widget.valor ?? opcionesIconos.first;
     final DropdownButton<Icon> botonDesplegable = DropdownButton<Icon>(
-      value: widget.valor,
-      items: <DropdownMenuItem<Icon>>[
-        DropdownMenuItem<Icon>(
-          value: opcionesIconos[Iconos.gota.index],
-          child: opcionesIconos[Iconos.gota.index],
-        ),
-        DropdownMenuItem<Icon>(
-          value: opcionesIconos[Iconos.correr.index],
-          child: opcionesIconos[Iconos.correr.index],
-        ),
-        DropdownMenuItem<Icon>(
-          value: opcionesIconos[Iconos.hierba.index],
-          child: opcionesIconos[Iconos.hierba.index],
-        ),
-      ],
+      value: valor,
+      items: <DropdownMenuItem<Icon>>[menuGota, menuCorrer, menuHierba],
       onChanged: (Icon? icono) {
         setState(() {
-          widget.valor = icono!;
+          valor = icono;
         });
       },
     );
