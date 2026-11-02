@@ -36,9 +36,8 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
     //recuperamos las estadísticas de la aplicación.
     cargarUltimaApertura(widget._preferenciasService);
     cargarNumeroAperturas(widget._preferenciasService);
-    listaHabitos = widget._preferenciasService.cargarHabitos();
     //lo dejo comentado pq queda pendiente a conectarlo con sqflite
-    //cargarEstadisticas();
+    cargarEstadisticas();
   }
 
   //recuperamos la última apertura de la aplicación.

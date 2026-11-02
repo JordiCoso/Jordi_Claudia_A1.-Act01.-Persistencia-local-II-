@@ -5,7 +5,7 @@ import '../services/preferenciasservice.dart';
 import '../models/habito.dart';
 import '../models/usuario.dart';
 import 'ajustes.dart';
-import 'estadisticas.dart';
+import 'estadisticas_page.dart';
 import 'gestiondehabitos.dart';
 
 class Principal extends StatefulWidget {
