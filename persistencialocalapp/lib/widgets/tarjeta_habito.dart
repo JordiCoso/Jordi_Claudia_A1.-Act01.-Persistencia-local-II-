@@ -12,6 +12,7 @@ class TarjetaHabito extends StatefulWidget {
   final ValueChanged<bool?>? completar;
   final VoidCallback editar;
   final VoidCallback eliminar;
+  final ValueChanged<Icon>? cambiarIcono; //avisamos a la pantalla cuando el usuario cambia a otro icono
 
   const TarjetaHabito({
     super.key,
@@ -22,6 +23,7 @@ class TarjetaHabito extends StatefulWidget {
     this.completar,
     required this.editar,
     required this.eliminar,
+    this.cambiarIcono,
   });
 
   static final ButtonStyle estilo = ElevatedButton.styleFrom(
@@ -39,15 +41,15 @@ class TarjetaHabito extends StatefulWidget {
 class _TarjetaHabitoState extends State<TarjetaHabito> {
   late DropdownMenuItem<Icon> menuGota = DropdownMenuItem<Icon>(
     value: opcionesIconos[NombreIconos.gota.index],
-    child: menuCorrer,
+    child: opcionesIconos[NombreIconos.gota.index], //hay q ponerlo asi pq entonces decimos exactamente q queremos mostrar
   );
   late DropdownMenuItem<Icon> menuCorrer = DropdownMenuItem<Icon>(
     value: opcionesIconos[NombreIconos.correr.index],
-    child: menuHierba,
+    child: opcionesIconos[NombreIconos.correr.index],
   );
   late DropdownMenuItem<Icon> menuHierba = DropdownMenuItem<Icon>(
     value: opcionesIconos[NombreIconos.hierba.index],
-    child: menuHierba,
+    child: opcionesIconos[NombreIconos.hierba.index],
   );
 
   Icon? valor = opcionesIconos[NombreIconos.gota.index];
@@ -61,6 +63,11 @@ class _TarjetaHabitoState extends State<TarjetaHabito> {
         setState(() {
           valor = icono;
         });
+
+        //commprobamos q se haya seleccionado un icono
+        if(icono != null && widget.cambiarIcono != null) {
+          widget.cambiarIcono!(icono);
+        }
       },
     );
 

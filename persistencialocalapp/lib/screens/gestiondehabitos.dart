@@ -30,11 +30,9 @@ class Gestiondehabitos extends StatefulWidget {
 
 // Un enum para que sea mas legible que significa cada codigo de color.
 
-
 class _GestiondehabitosState extends State<Gestiondehabitos> {
-
-
-  late List<Habito> listaHabitos = widget._preferenciasService.cargarHabitos();
+  List<Habito> listaHabitos =
+      []; //lista donde guardaremos los habitos recuperados de sqflite
 
   /* Al ser una lista que cambia con el numero de habitos no puedo hardcodear
    * los editing controlers y una variable global de editar.
@@ -43,6 +41,26 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
    */
   Map<int, TextEditingController> textEditingControllers = {};
   Map<int, bool> editables = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarHabitos();
+  }
+
+  //cargamos los habitos del usuario desde el sqflite
+  void _cargarHabitos() async {
+    List<Habito> habitos = await widget._databasehelper.cargarHabitos(
+      widget._usuario.nombre,
+      widget._usuario.rol,
+    );
+
+    if (!mounted) {
+      setState(() {
+        listaHabitos = habitos;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -100,6 +118,8 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
                                 completado: false,
                                 editar: () => _editarHabito(index),
                                 eliminar: () => _borrarHabito(index),
+                                cambiarIcono: (icono) =>
+                                    _iconoSeleccion(icono, index),
                               ),
                             ),
                           ],
@@ -164,6 +184,7 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
                         'Habito nuevo #${listaHabitos.length}',
                         listaColores[NombreColores.verde.index],
                         DateTime(0),
+                        nombreUsuario: widget._usuario.nombre,
                       ),
                     );
                   });
@@ -236,15 +257,18 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
     Habito habito = listaHabitos[index];
 
     habito.nombre = textEditingControllers[index]?.text ?? '';
-    // Remplazamos el habito por el nuevo con el nuevo nombre
-    habito = Habito(index, habito.nombre, habito.color, habito.fechaCompletado);
   }
 
   void _cambiarColorHabito(int index, Color color) {
     listaHabitos[index].color = color;
   }
 
-  void _iconoSeleccion(Icon? icon, int index) async {
-    Databasehelper helper = await Databasehelper.crear();
+  void _iconoSeleccion(Icon? icon, int index) {
+    //guardamos el icon en el habito y comprobamos q no sea null antes de actualizar
+    if (icon != null) {
+      setState(() {
+        listaHabitos[index].icono = icon;
+      });
+    }
   }
 }

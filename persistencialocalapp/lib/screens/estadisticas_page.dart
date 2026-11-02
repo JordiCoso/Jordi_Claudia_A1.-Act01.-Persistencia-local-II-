@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/usuario.dart';
 import '../services/preferenciasservice.dart';
 import '../widgets/dato_estadistica.dart';
 import '/models/habito.dart';
@@ -8,8 +9,9 @@ import 'package:habitosapp/services/databasehelper.dart';
 
 class PantallaEstadisticas extends StatefulWidget {
   final PreferenciasService _preferenciasService;
+  final Usuario usuario;
 
-  const PantallaEstadisticas({super.key, required this._preferenciasService});
+  const PantallaEstadisticas({super.key, required this._preferenciasService, required this.usuario});
 
   @override
   State<PantallaEstadisticas> createState() => _PantallaEstadisticas();
@@ -72,18 +74,14 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
     Databasehelper databse =
         await Databasehelper.crear(); //obtenemos la conexion con la bbdd
 
-    List<Map<String, dynamic>> estadisticas = [];
+    List<Habito> habitos = await databse.cargarHabitos(widget.usuario.nombre, widget.usuario.rol);
 
-    for (Habito habito in listaHabitos) {
-      final resultado = await databse.obtenerEstadisticas(habito.identificador);
-
-      estadisticas.addAll(resultado); //añadimos los registros q se han encontrado a la lista sin borrar los otros
+    //actualizamos la lista
+    if(!mounted) {
+      setState(() {
+        listaHabitos = habitos;
+      });
     }
-
-    if (!mounted) return;
-    setState(() {
-      listaEstadisticas = estadisticas; //guarda el resultado y se actualiza
-    });
   }
 
   @override

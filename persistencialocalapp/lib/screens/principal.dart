@@ -117,6 +117,7 @@ class _PrincipalState extends State<Principal> {
                     MaterialPageRoute(
                       builder: (context) => PantallaEstadisticas(
                         preferenciasService: widget._preferenciasService,
+                        usuario: widget._usuario,
                       ),
                     ),
                   );

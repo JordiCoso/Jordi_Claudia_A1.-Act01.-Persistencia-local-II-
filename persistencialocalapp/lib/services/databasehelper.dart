@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -68,6 +69,7 @@ class Databasehelper {
   static const columnaHabitosNombre = 'nombre';
   static const columnaHabitosColor = 'color';
   static const columnaHabitosCompletado = 'completado';
+  static const columnaHabitosIcono = 'icono';
   static const columnaHabitosUsuarioFK = 'usuario_fk';
 
   static const tablaUsuarios = 'usuarios';
@@ -106,6 +108,7 @@ class Databasehelper {
       '$columnaHabitosId INTEGER PRIMARY KEY AUTOINCREMENT, '
       '$columnaHabitosNombre TEXT NOT NULL, '
       '$columnaHabitosColor TEXT NOT NULL, ' // Lo guardo como texto para almacenar los distintos colores juntos.
+      '$columnaHabitosIcono INTEGER NOT NULL, ' //lo guardo como numero para almacenar los distintos iconos
       '$columnaHabitosCompletado INTEGER NOT NULL, '
       '$columnaHabitosUsuarioFK TEXT NOT NULL, '
       'FOREIGN KEY ($columnaHabitosUsuarioFK) REFERENCES $tablaUsuarios($columnaUsuariosUsuario) ON DELETE CASCADE)',
@@ -232,10 +235,21 @@ class Databasehelper {
         whereArgs: [habito.identificador],
       );
 
+      //asigno un numero segun el icono
+      int numeroIcono = 0;
+      if(habito.icono.icon == Icons.water_drop) {
+        numeroIcono = 0;
+      } else if (habito.icono.icon == Icons.directions_run) {
+        numeroIcono = 1;
+      } else if (habito.icono.icon == Icons.grass) {
+        numeroIcono = 2;
+      }
+
       if (resultado.isEmpty) {
         int hid = await _baseDeDatos.insert(tablaHabitos, {
           columnaHabitosNombre: habito.nombre,
           columnaHabitosColor: habito.convertirColorAString(habito.color),
+          columnaHabitosIcono: numeroIcono,
           columnaHabitosCompletado: habito.completado ? 1 : 0,
           columnaHabitosUsuarioFK: habito.nombreUsuario,
         });
@@ -264,6 +278,7 @@ class Databasehelper {
             {
               columnaHabitosNombre: habito.nombre,
               columnaHabitosColor: habito.convertirColorAString(habito.color),
+              columnaHabitosIcono: numeroIcono,
               columnaHabitosCompletado: habito.completado ? 1 : 0,
             },
             where: '$columnaHabitosId = ?',
@@ -304,6 +319,7 @@ class Databasehelper {
       late String nombreHabito;
       late String colorString;
       late int completadoInt;
+      late int numeroIcono;
 
       late String fechaCompletadoString;
       late int rachaActual;
@@ -321,6 +337,9 @@ class Databasehelper {
             break;
           case columnaHabitosColor:
             colorString = valor as String;
+            break;
+          case columnaHabitosIcono:
+            numeroIcono = valor as int;
             break;
           case columnaHabitosCompletado:
             completadoInt = valor as int;
@@ -347,6 +366,7 @@ class Databasehelper {
         nombreHabito: nombreHabito,
         colorString: colorString,
         completadoInt: completadoInt,
+        iconoInt: numeroIcono,
         fechaCompletadoString: fechaCompletadoString,
         rachaActual: rachaActual,
         diasCompletados: diasCompletados,
