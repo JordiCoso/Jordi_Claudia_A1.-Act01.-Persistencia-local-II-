@@ -32,6 +32,7 @@ class Habito {
     required this.diasCompletados,
     required this.nombreUsuario,
   }) {
+    // Icono se enviara como un INTEGER
     switch (iconoInt) {
       case 0:
         icono = Icon(Icons.water_drop);
