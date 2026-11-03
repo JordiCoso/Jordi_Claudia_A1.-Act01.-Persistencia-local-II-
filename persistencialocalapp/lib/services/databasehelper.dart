@@ -376,60 +376,6 @@ class Databasehelper {
           whereArgs: esAdmin ? null : [usuario],
         );
 
-    /* final List<Map<String, Object?>> keyValueEstadisticas =
-        await obtenerEstadisticas(usuario, esAdmin);
-
-    /// Lista unificada de datos sobre habito.
-    List<Map<String, Object?>> keyValueHabitos =
-        keyValueHabitosIncompleto + keyValueEstadisticas;
-
-    for (Map<String, Object?> fila in keyValueHabitos) {
-      late int hid;
-      late String nombreHabito;
-      late String colorString;
-      late int completadoInt;
-      late int numeroIcono;
-
-      late String fechaCompletadoString;
-      late int rachaActual;
-      late int diasCompletados;
-
-      late String nombreUsuario;
-
-      fila.forEach((columna, valor) {
-        switch (columna) {
-          case columnaHabitosId:
-            hid = valor as int;
-            break;
-          case columnaHabitosNombre:
-            nombreHabito = valor as String;
-            break;
-          case columnaHabitosColor:
-            colorString = valor as String;
-            break;
-          case columnaHabitosIcono:
-            numeroIcono = valor as int;
-            break;
-          case columnaHabitosCompletado:
-            completadoInt = valor as int;
-            break;
-          case columnaEstadisticasFechacompletado:
-            fechaCompletadoString = valor as String;
-            break;
-          case columnaEstadisticasRachaactual:
-            rachaActual = valor as int;
-            break;
-          case columnaEstadisticasDiascompletados:
-            diasCompletados = valor as int;
-            break;
-          case columnaHabitosUsuarioFK: // Solo lo necesitamos de una tabla.
-            nombreUsuario = valor as String;
-            break;
-
-          default:
-        }
-      });*/
-
     for (Map<String, Object?> fila in keyValueHabitosIncompleto) {
       //buscamos las estadisticas del habito actual
       var estadisticas = await _baseDeDatos.query(

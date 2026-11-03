@@ -64,7 +64,9 @@ class _PrincipalState extends State<Principal> {
               ),
               SizedBox(height: 20),
               Text(
-                'Has completado ${_contarHabitosCompletados()} de ${listaHabitos.length} habitos',
+                listaHabitos.isNotEmpty
+                    ? 'Has completado ${_contarHabitosCompletados()} de ${listaHabitos.length} habitos'
+                    : 'No tienes ningún habito creado',
                 style: TextStyle(fontSize: 30),
               ),
               SizedBox(height: 20),
@@ -109,7 +111,7 @@ class _PrincipalState extends State<Principal> {
 
               ElevatedButton(
                 onPressed: _abrirGestionHabitos,
-                child: const Text('Gestionar habitos'),
+                child: const Text('Crear'),
               ),
 
               SizedBox(height: 16),
