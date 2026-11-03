@@ -76,12 +76,11 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
 
     List<Habito> habitos = await databse.cargarHabitos(widget.usuario.nombre, widget.usuario.rol);
 
-    //actualizamos la lista
-    if(!mounted) {
-      setState(() {
-        listaHabitos = habitos;
-      });
-    }
+    if(!mounted)  return;
+
+    setState(() {
+      listaHabitos = habitos;
+    });
   }
 
   @override

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:habitosapp/services/databasehelper.dart';
 import 'package:habitosapp/screens/registro_page.dart';
+import 'package:habitosapp/screens/editar_usuario_page.dart';
+
+import '../models/habito.dart';
 
 class AdministracionPage extends StatefulWidget {
   final Databasehelper _databasehelper;
@@ -19,11 +22,13 @@ class AdministracionPage extends StatefulWidget {
 class _AdministracionPageState extends State<AdministracionPage> {
   //guardamos los usuarios que obtenemos de la bbdd
   List<Map<String, Object?>> listaUsuarios = [];
+  List<Habito> listaHabitos = [];
 
   @override
   void initState() {
     super.initState();
     cargarUsuarios();
+    cargarHabitosAdmin();
   }
 
   //cargamos los usuarios de la bbdd
@@ -91,6 +96,124 @@ class _AdministracionPageState extends State<AdministracionPage> {
     }
   }
 
+  Future<void> abrirEditarUsuario(Map<String, Object?> usuario) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditarUsuarioPage(
+          databasehelper: widget._databasehelper,
+          usuario: usuario,
+          usuarioActual: widget.usuarioActual,
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    await cargarUsuarios();
+  }
+
+  //recuperamos habitos
+  Future<void> cargarHabitosAdmin() async {
+    List<Habito> habitos = await widget._databasehelper.cargarHabitos(
+      widget.usuarioActual,
+      'admin',
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      listaHabitos = habitos;
+    });
+  }
+
+  Future<void> confirmarEliminarHabito(Habito habito) async {
+    bool? confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Eliminar hábito'),
+          content: Text(
+            '¿Quieres eliminar el hábito ${habito.nombre} de ${habito.nombreUsuario}?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmar == true) {
+      //marcamos el habito para eliminarlo
+      habito.pendingBorrarse = true;
+
+      //reutilizamos el metodo q teniamos en sqflite
+      await widget._databasehelper.guardarHabitos([habito]);
+
+      if (!mounted) return;
+
+      await cargarHabitosAdmin();
+    }
+  }
+
+  //para cambiar el nombre del habito
+  Future<void> editarHabitoAdmin(Habito habito) async {
+    TextEditingController nombreController = TextEditingController(
+      text: habito.nombre,
+    );
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Editar hábito'),
+          content: TextField(controller: nombreController),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (nombreController.text.trim().isEmpty) {
+                  return;
+                }
+
+                habito.nombre = nombreController.text.trim();
+
+                await widget._databasehelper.guardarHabitos([habito]);
+
+                if (!context.mounted)
+                  return; //es para comprobar q el widget sigue activo
+                Navigator.pop(context);
+              },
+              child: Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    nombreController.dispose();
+
+    if (!mounted) return;
+
+    await cargarHabitosAdmin();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,6 +247,16 @@ class _AdministracionPageState extends State<AdministracionPage> {
                     //dice el rol y usuario
                     ListTile(title: Text(usuario), subtitle: Text(rol)),
 
+                    //creo el boton para editar
+                    ElevatedButton(
+                      onPressed: () {
+                        abrirEditarUsuario(listaUsuarios[index]);
+                      },
+                      child: Text('Editar usuario'),
+                    ),
+
+                    SizedBox(height: 10),
+
                     //el admin no puede eliminarse
                     if (usuario != widget.usuarioActual)
                       ElevatedButton(
@@ -132,6 +265,53 @@ class _AdministracionPageState extends State<AdministracionPage> {
                         },
                         child: Text('Eliminar usuario'),
                       ),
+
+                    SizedBox(height: 16),
+                  ],
+                );
+              },
+            ),
+          ),
+
+          SizedBox(height: 16),
+
+          Text(
+            'Hábitos registrados',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+
+          SizedBox(height: 8),
+
+          //habitos de todos los usuarios
+          Expanded(
+            child: ListView.builder(
+              itemCount: listaHabitos.length,
+              itemBuilder: (context, index) {
+                Habito habito = listaHabitos[index];
+
+                return Column(
+                  children: [
+                    Text(habito.nombre),
+
+                    Text('Usuario: ${habito.nombreUsuario}'),
+
+                    SizedBox(height: 8),
+
+                    ElevatedButton(
+                      onPressed: () {
+                        editarHabitoAdmin(habito);
+                      },
+                      child: Text('Editar hábito'),
+                    ),
+
+                    SizedBox(height: 8),
+
+                    ElevatedButton(
+                      onPressed: () {
+                        confirmarEliminarHabito(habito);
+                      },
+                      child: Text('Eliminar hábito'),
+                    ),
 
                     SizedBox(height: 16),
                   ],

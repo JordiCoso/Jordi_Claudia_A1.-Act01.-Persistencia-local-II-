@@ -39,7 +39,7 @@ class _PrincipalState extends State<Principal> {
   Future<void> cargarHabitos() async {
     listaHabitos = await widget._databasehelper.cargarHabitos(
       widget._usuario.nombre,
-      widget._usuario.rol,
+      'usuario',
     );
 
     if (!mounted) return;
@@ -196,7 +196,7 @@ class _PrincipalState extends State<Principal> {
     // Cuando vuelva cargamos los datos nuevos y remplazamos.
     List<Habito> habitos = await widget._databasehelper.cargarHabitos(
       widget._usuario.nombre,
-      widget._usuario.rol,
+      'usuario',
     );
 
     setState(() {
