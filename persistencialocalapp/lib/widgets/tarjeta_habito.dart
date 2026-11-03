@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:habitosapp/models/colores.dart';
 
 import '../models/iconos.dart';
 
-class TarjetaHabito extends StatefulWidget {
+class TarjetaHabito extends StatelessWidget {
   final String nombre;
   final Color color;
   final bool completado;
 
-  final IconData icono;
+  final Icon icono;
 
   final ValueChanged<bool?>? completar;
-  final VoidCallback editar;
-  final VoidCallback eliminar;
-  final ValueChanged<Icon>? cambiarIcono; //avisamos a la pantalla cuando el usuario cambia a otro icono
+  final VoidCallback? editar;
+  final VoidCallback? eliminar;
+  final ValueChanged<Icon>?
+  cambiarIcono; //avisamos a la pantalla cuando el usuario cambia a otro icono
 
-  const TarjetaHabito({
+  TarjetaHabito({
     super.key,
     this.nombre = '',
     required this.color,
     required this.completado,
-    this.icono = Icons.water,
+    this.icono = const Icon(Icons.water, color: colorPredefinido),
     this.completar,
-    required this.editar,
-    required this.eliminar,
+    this.editar,
+    this.eliminar,
     this.cambiarIcono,
   });
 
@@ -35,65 +37,32 @@ class TarjetaHabito extends StatefulWidget {
   );
 
   @override
-  State<TarjetaHabito> createState() => _TarjetaHabitoState();
-}
-
-class _TarjetaHabitoState extends State<TarjetaHabito> {
-  late DropdownMenuItem<Icon> menuGota = DropdownMenuItem<Icon>(
-    value: opcionesIconos[NombreIconos.gota.index],
-    child: opcionesIconos[NombreIconos.gota.index], //hay q ponerlo asi pq entonces decimos exactamente q queremos mostrar
-  );
-  late DropdownMenuItem<Icon> menuCorrer = DropdownMenuItem<Icon>(
-    value: opcionesIconos[NombreIconos.correr.index],
-    child: opcionesIconos[NombreIconos.correr.index],
-  );
-  late DropdownMenuItem<Icon> menuHierba = DropdownMenuItem<Icon>(
-    value: opcionesIconos[NombreIconos.hierba.index],
-    child: opcionesIconos[NombreIconos.hierba.index],
-  );
-
-  Icon? valor = opcionesIconos[NombreIconos.gota.index];
-
-  @override
   Widget build(BuildContext context) {
-    final DropdownButton<Icon> botonDesplegable = DropdownButton<Icon>(
-      value: valor,
-      items: <DropdownMenuItem<Icon>>[menuGota, menuCorrer, menuHierba],
-      onChanged: (Icon? icono) {
-        setState(() {
-          valor = icono;
-        });
-
-        //commprobamos q se haya seleccionado un icono
-        if(icono != null && widget.cambiarIcono != null) {
-          widget.cambiarIcono!(icono);
-        }
-      },
-    );
-
     return Expanded(
       child: Row(
         children: [
-          if (widget.completar != null)
-            Checkbox(value: widget.completado, onChanged: widget.completar),
-          widget.completar == null
-              ? botonDesplegable
-              : Icon(widget.icono, color: widget.color),
+          if (completar != null)
+            Checkbox(value: completado, onChanged: completar),
+          if (completar != null) Expanded(child: icono),
 
-          Text(widget.nombre, style: TextStyle(color: widget.color)),
-          SizedBox(width: 0),
-          ElevatedButton(
-            onPressed: widget.editar,
-            style: TarjetaHabito.estilo,
+          Expanded(
+            child: Text(nombre, style: TextStyle(color: color)),
+          ),
 
-            child: const Icon(Icons.edit),
-          ),
-          const SizedBox(width: 0),
-          ElevatedButton(
-            onPressed: widget.eliminar,
-            style: TarjetaHabito.estilo,
-            child: const Icon(Icons.delete),
-          ),
+          if (editar != null)
+            ElevatedButton(
+              onPressed: editar,
+              style: estilo,
+
+              child: const Icon(Icons.edit),
+            ),
+
+          if (eliminar != null)
+            ElevatedButton(
+              onPressed: eliminar,
+              style: estilo,
+              child: const Icon(Icons.delete),
+            ),
         ],
       ),
     );

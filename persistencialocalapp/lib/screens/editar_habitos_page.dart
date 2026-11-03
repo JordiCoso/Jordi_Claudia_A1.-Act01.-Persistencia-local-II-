@@ -4,6 +4,7 @@ import 'package:habitosapp/widgets/boton_principal.dart';
 import 'package:habitosapp/widgets/campo_texto_app.dart';
 
 import '../models/colores.dart';
+import '../models/iconos.dart';
 import '../services/preferenciasservice.dart';
 
 import '../models/habito.dart';
@@ -17,12 +18,29 @@ class Gestiondehabitos extends StatefulWidget {
   final Databasehelper _databasehelper;
   final Usuario _usuario;
 
-  const Gestiondehabitos({
+  Gestiondehabitos({
     super.key,
     required this._preferenciasService,
     required this._databasehelper,
     required this._usuario,
   });
+
+  final DropdownMenuItem<IconData> menuGota = DropdownMenuItem<IconData>(
+    value: opcionesIconos[NombreIconos.gota.index],
+    child: Icon(
+      opcionesIconos[NombreIconos.gota.index],
+    ), //hay q ponerlo asi pq entonces decimos exactamente q queremos mostrar
+  );
+
+  final DropdownMenuItem<IconData> menuCorrer = DropdownMenuItem<IconData>(
+    value: opcionesIconos[NombreIconos.correr.index],
+    child: Icon(opcionesIconos[NombreIconos.correr.index]),
+  );
+
+  final DropdownMenuItem<IconData> menuHierba = DropdownMenuItem<IconData>(
+    value: opcionesIconos[NombreIconos.hierba.index],
+    child: Icon(opcionesIconos[NombreIconos.hierba.index]),
+  );
 
   @override
   State<Gestiondehabitos> createState() => _GestiondehabitosState();
@@ -31,8 +49,10 @@ class Gestiondehabitos extends StatefulWidget {
 // Un enum para que sea mas legible que significa cada codigo de color.
 
 class _GestiondehabitosState extends State<Gestiondehabitos> {
-  List<Habito> listaHabitos = []; //lista donde guardaremos los habitos recuperados de sqflite
+  List<Habito> listaHabitos =
+      []; //lista donde guardaremos los habitos recuperados de sqflite
   List<Habito> habitosBorrados = []; //guardamos los habitos q queremos borrar
+  List<IconData?> listaValores = [];
 
   /* Al ser una lista que cambia con el numero de habitos no puedo hardcodear
    * los editing controlers y una variable global de editar.
@@ -54,6 +74,10 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
       widget._usuario.nombre,
       'usuario',
     );
+
+    for (Habito habito in habitos) {
+      listaValores.add(habito.icono.icon);
+    }
 
     if (!mounted) return;
 
@@ -111,6 +135,31 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
                               ),
                             ),
                             SizedBox(width: 10),
+                            Expanded(
+                              child: DropdownButton<IconData>(
+                                value: listaValores[index],
+                                items: <DropdownMenuItem<IconData>>[
+                                  widget.menuGota,
+                                  widget.menuCorrer,
+                                  widget.menuHierba,
+                                ],
+                                onChanged: (IconData? icono) {
+                                  setState(() {
+                                    listaValores[index] = icono!;
+                                  });
+                                  //comprobamos q se haya seleccionado un icono
+                                  if (icono != null) {
+                                    _iconoSeleccion(
+                                      Icon(
+                                        icono,
+                                        color: listaHabitos[index].color,
+                                      ),
+                                      index,
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
                             Expanded(
                               child: TarjetaHabito(
                                 color:
@@ -180,13 +229,14 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
                   setState(() {
                     listaHabitos.add(
                       Habito(
-                        listaHabitos.length,
-                        'Habito nuevo #${listaHabitos.length}',
+                        -1,
+                        'Habito nuevo',
                         listaColores[NombreColores.verde.index],
                         DateTime(0),
                         nombreUsuario: widget._usuario.nombre,
                       ),
                     );
+                    listaValores.add(opcionesIconos[NombreIconos.gota.index]);
                   });
                 },
               ),
@@ -195,15 +245,17 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
                 texto: 'Guardar',
                 pulsar: () async {
                   //actualizamos los nombres de los habitos
-                  for(int i = 0; i < listaHabitos.length; i++) {
-                    listaHabitos[i].nombre = textEditingControllers[i]?.text ?? listaHabitos[i].nombre;
+                  for (int i = 0; i < listaHabitos.length; i++) {
+                    listaHabitos[i].nombre =
+                        textEditingControllers[i]?.text ??
+                        listaHabitos[i].nombre;
                   }
                   //añado los habitos borrado para guardarlos en sqflite
                   listaHabitos.addAll(habitosBorrados);
 
                   await widget._databasehelper.guardarHabitos(listaHabitos);
 
-                  if(!mounted) return;
+                  if (!mounted) return;
                   Navigator.pop(context);
                 },
               ),
@@ -245,7 +297,8 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
   TextEditingController _darControllador(int index) {
     // Nos aseguramos que si no existe le de uno nuevo.
     TextEditingController controllador =
-        textEditingControllers[index] ?? TextEditingController(text: listaHabitos[index].nombre);
+        textEditingControllers[index] ??
+        TextEditingController(text: listaHabitos[index].nombre);
     // Nos aseguramos que si no existia ahora este en el Map.
     textEditingControllers[index] = controllador;
     // Finalmente se lo damos al parametro controller:

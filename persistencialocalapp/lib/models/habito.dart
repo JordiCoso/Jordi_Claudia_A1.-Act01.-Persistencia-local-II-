@@ -20,7 +20,10 @@ class Habito {
     this.fechaCompletado, {
     this.nombreUsuario = '',
   }) {
-    icono = opcionesIconos[0]; //cuando se crea un habito nuevo, se pone un icono por default
+    icono = Icon(
+      opcionesIconos[0],
+      color: color,
+    ); //cuando se crea un habito nuevo, se pone un icono por default
   }
 
   Habito.fromBBDD({
@@ -34,24 +37,24 @@ class Habito {
     required this.diasCompletados,
     required this.nombreUsuario,
   }) {
-    // Icono se enviara como un INTEGER
-    switch (iconoInt) {
-      case 0:
-        icono = Icon(Icons.water_drop);
-        break;
-      case 1:
-        icono = Icon(Icons.directions_run);
-        break;
-      case 2:
-        icono = Icon(Icons.grass);
-        break;
-    }
-
     identificador = hid;
     nombre = nombreHabito;
     color = _convertirStringAColor(colorString);
     completado = completadoInt == 1;
     fechaCompletado = DateTime.parse(fechaCompletadoString);
+
+    // Icono se enviara como un INTEGER
+    switch (iconoInt) {
+      case 0:
+        icono = Icon(Icons.water_drop, color: color);
+        break;
+      case 1:
+        icono = Icon(Icons.directions_run, color: color);
+        break;
+      case 2:
+        icono = Icon(Icons.grass, color: color);
+        break;
+    }
   }
 
   Color _convertirStringAColor(String color) {

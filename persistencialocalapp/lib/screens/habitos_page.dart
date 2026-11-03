@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:habitosapp/screens/administracion_page.dart';
+import 'package:habitosapp/widgets/tarjeta_habito.dart';
 
 import '../services/databasehelper.dart';
 import '../services/preferenciasservice.dart';
@@ -7,7 +8,7 @@ import '../models/habito.dart';
 import '../models/usuario.dart';
 import 'ajustes.dart';
 import 'estadisticas_page.dart';
-import 'gestiondehabitos.dart';
+import 'editar_habitos_page.dart';
 import 'login_page.dart';
 
 class Principal extends StatefulWidget {
@@ -63,7 +64,7 @@ class _PrincipalState extends State<Principal> {
               ),
               SizedBox(height: 20),
               Text(
-                'Has completado ${_contarHabitosCompletados()} de ${widget._usuario.numeroHabitos} habitos',
+                'Has completado ${_contarHabitosCompletados()} de ${listaHabitos.length} habitos',
                 style: TextStyle(fontSize: 30),
               ),
               SizedBox(height: 20),
@@ -78,19 +79,27 @@ class _PrincipalState extends State<Principal> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Checkbox(
-                          value: listaHabitos[index].completado,
-                          onChanged: (bool? newValue) {
-                            _completarHabito(newValue, index);
-                          },
+                        Expanded(
+                          child: TarjetaHabito(
+                            nombre: listaHabitos[index].nombre,
+                            color: listaHabitos[index].color,
+                            completado: listaHabitos[index].completado,
+                            icono: listaHabitos[index].icono,
+                            completar: (bool? newValue) =>
+                                _completarHabito(index),
+                          ),
                         ),
-
-                        Text(
-                          softWrap: true,
-                          '${listaHabitos[index].nombre} ${listaHabitos[index].completado ? listaHabitos[index].fechaCompletado : ''}',
-                          style: TextStyle(color: listaHabitos[index].color),
-                          textAlign: TextAlign.center,
-                        ),
+                        if (listaHabitos[index].completado)
+                          Expanded(
+                            child: Text(
+                              softWrap: true,
+                              '${listaHabitos[index].fechaCompletado}',
+                              style: TextStyle(
+                                color: listaHabitos[index].color,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                       ],
                     ),
                   );
@@ -204,7 +213,7 @@ class _PrincipalState extends State<Principal> {
     });
   }
 
-  void _completarHabito(bool? newValue, int index) {
+  void _completarHabito(int index) async {
     /* Me parece que asignar una variable en dart asigna un puntero
      * porque si lo copiase tendria que remplazar el original que hay
      * en la lista pero funciona sin hacerlo.
@@ -213,19 +222,18 @@ class _PrincipalState extends State<Principal> {
 
     // Cuando cambia el CheckBox comprobamos a que y actualizamos pantalla.
     setState(() {
-      if (newValue == null) return;
-      if (newValue == false) {
+      if (habito.completado) {
         habito.completado = false;
         return;
+      } else {
+        habito.actualizarRacha();
+        habito.fechaCompletado = DateTime.now();
+        habito.completado = true;
       }
-
-      habito.actualizarRacha();
-      habito.fechaCompletado = DateTime.now();
-      habito.completado = true;
-
-      // Una vez esta hecho los cambios guardamos;
-      widget._databasehelper.guardarHabitos(listaHabitos);
     });
+
+    // Una vez esta hecho los cambios guardamos;
+    await widget._databasehelper.guardarHabitos(listaHabitos);
   }
 
   int _contarHabitosCompletados() {

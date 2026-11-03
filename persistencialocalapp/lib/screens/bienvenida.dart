@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:habitosapp/services/databasehelper.dart';
 
 import '/models/usuario.dart';
-import '/screens/principal.dart';
+import 'habitos_page.dart';
 import '../services/preferenciasservice.dart';
 
 class Bienvenida extends StatefulWidget {

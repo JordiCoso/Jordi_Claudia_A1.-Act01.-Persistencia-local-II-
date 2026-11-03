@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:habitosapp/screens/principal.dart';
+import 'package:habitosapp/screens/habitos_page.dart';
 import 'package:habitosapp/screens/registro_page.dart';
 import 'package:habitosapp/services/databasehelper.dart';
 import 'package:habitosapp/services/preferenciasservice.dart';

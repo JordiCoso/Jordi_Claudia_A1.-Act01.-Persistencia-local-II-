@@ -8,3 +8,5 @@ const List<Color> listaColores = [
   Color(0xFF6CCCC4), // Azul
   Color(0xFF807B44), // Verde
 ];
+
+const Color colorPredefinido = Color(0xFF807B44);
