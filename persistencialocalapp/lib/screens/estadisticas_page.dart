@@ -27,9 +27,6 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
   //lista de habitos guardados,
   List<Habito> listaHabitos = [];
 
-  //va a almacenar los registros q recuperaremos de sqflite
-  List<Map<String, dynamic>> listaEstadisticas = [];
-
   //método que se ejecuta cuando se crea la pantalla.
   @override
   void initState() {
@@ -74,7 +71,7 @@ class _PantallaEstadisticas extends State<PantallaEstadisticas> {
     Databasehelper databse =
         await Databasehelper.crear(); //obtenemos la conexion con la bbdd
 
-    List<Habito> habitos = await databse.cargarHabitos(widget.usuario.nombre, widget.usuario.rol);
+    List<Habito> habitos = await databse.cargarHabitos(widget.usuario.nombre, 'usuario');
 
     if(!mounted)  return;
 

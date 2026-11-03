@@ -52,7 +52,7 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
   void _cargarHabitos() async {
     List<Habito> habitos = await widget._databasehelper.cargarHabitos(
       widget._usuario.nombre,
-      widget._usuario.rol,
+      'usuario',
     );
 
     if (!mounted) return;

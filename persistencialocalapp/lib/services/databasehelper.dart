@@ -432,41 +432,51 @@ class Databasehelper {
 
     for (Map<String, Object?> fila in keyValueHabitosIncompleto) {
       //buscamos las estadisticas del habito actual
-      final estadisticas = await _baseDeDatos.query(
+      var estadisticas = await _baseDeDatos.query(
         tablaEstadisticas,
         where: '$columnaEstadisticasHabitoidFK = ?',
         whereArgs: [fila[columnaHabitosId]],
       );
 
+      //declaramos las variables para crear el habito
+      //los datos de habitos son declarados como fila, y los de estadisticas son declarados como estadistica
+      int hid = fila[columnaHabitosId] as int;
+      String nombreHabito = fila[columnaHabitosNombre] as String;
+      String colorString = fila[columnaHabitosColor] as String;
+      int completadoInt = fila[columnaHabitosCompletado] as int;
+      int numeroIcono = fila[columnaHabitosIcono] as int;
+      String nombreUsuario = fila[columnaHabitosUsuarioFK] as String;
+
+      //valores por defecto si no existen estadisticas
+      String fechaCompletadoString = DateTime(0).toString();
+      int rachaActual = 0;
+      int diasCompletados = 0;
+
+      //si existen estadisticas, recuperamos sus valores
       for (Map<String, Object?> estadistica in estadisticas) {
-        //declaramos las variables para usarlo en habito.frombddd
-        //los datos de habitos son declarados como fila, y los de estadisticas son declarados como estadistica
-        int hid = fila[columnaHabitosId] as int;
-        String nombreHabito = fila[columnaHabitosNombre] as String;
-        String colorString = fila[columnaHabitosColor] as String;
-        int completadoInt = fila[columnaHabitosCompletado] as int;
-        int numeroIcono = fila[columnaHabitosIcono] as int;
-        String fechaCompletadoString =
-            estadistica[columnaEstadisticasFechacompletado] as String;
-        int rachaActual = estadistica[columnaEstadisticasRachaactual] as int;
-        int diasCompletados =
+        fechaCompletadoString =
+            estadistica[columnaEstadisticasFechacompletado] as String? ??
+            DateTime(0).toString();
+
+        rachaActual = estadistica[columnaEstadisticasRachaactual] as int;
+        diasCompletados =
             estadistica[columnaEstadisticasDiascompletados] as int;
-        String nombreUsuario = fila[columnaHabitosUsuarioFK] as String;
-
-        final habito = Habito.fromBBDD(
-          hid: hid,
-          nombreHabito: nombreHabito,
-          colorString: colorString,
-          completadoInt: completadoInt,
-          iconoInt: numeroIcono,
-          fechaCompletadoString: fechaCompletadoString,
-          rachaActual: rachaActual,
-          diasCompletados: diasCompletados,
-          nombreUsuario: nombreUsuario,
-        );
-
-        habitos.add(habito);
       }
+
+
+      final habito = Habito.fromBBDD(
+        hid: hid,
+        nombreHabito: nombreHabito,
+        colorString: colorString,
+        completadoInt: completadoInt,
+        iconoInt: numeroIcono,
+        fechaCompletadoString: fechaCompletadoString,
+        rachaActual: rachaActual,
+        diasCompletados: diasCompletados,
+        nombreUsuario: nombreUsuario,
+      );
+
+      habitos.add(habito);
     }
 
     return habitos;

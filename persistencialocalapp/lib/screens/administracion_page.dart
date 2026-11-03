@@ -3,6 +3,8 @@ import 'package:habitosapp/services/databasehelper.dart';
 import 'package:habitosapp/screens/registro_page.dart';
 import 'package:habitosapp/screens/editar_usuario_page.dart';
 
+import '../models/colores.dart';
+
 import '../models/habito.dart';
 
 class AdministracionPage extends StatefulWidget {
@@ -23,12 +25,14 @@ class _AdministracionPageState extends State<AdministracionPage> {
   //guardamos los usuarios que obtenemos de la bbdd
   List<Map<String, Object?>> listaUsuarios = [];
   List<Habito> listaHabitos = [];
+  List<Map<String, dynamic>> listaEstadisticas = [];
 
   @override
   void initState() {
     super.initState();
     cargarUsuarios();
     cargarHabitosAdmin();
+    cargarEstadisticasAdmin();
   }
 
   //cargamos los usuarios de la bbdd
@@ -214,6 +218,182 @@ class _AdministracionPageState extends State<AdministracionPage> {
     await cargarHabitosAdmin();
   }
 
+  Future<void> crearHabitoAdmin(String usuario) async {
+    TextEditingController nombreController = TextEditingController();
+
+    bool? guardar = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Crear hábito para $usuario'),
+          content: TextField(
+            controller: nombreController,
+            decoration: InputDecoration(labelText: 'Nombre del hábito'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (nombreController.text.trim().isEmpty) {
+                  return;
+                }
+
+                Navigator.pop(context, true);
+              },
+              child: Text('Crear'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (guardar == true) {
+      Habito nuevoHabito = Habito(
+        0,
+        nombreController.text.trim(),
+        listaColores[NombreColores.verde.index],
+        DateTime(0),
+        nombreUsuario: usuario,
+      );
+
+      await widget._databasehelper.guardarHabitos([nuevoHabito]);
+
+      if (mounted) {
+        await cargarHabitosAdmin();
+      }
+    }
+
+    nombreController.dispose();
+  }
+
+  //cargamos las estadisticas de todos los usuarios
+  Future<void> cargarEstadisticasAdmin() async {
+    final estadisticas = await widget._databasehelper.obtenerEstadisticas(
+      widget.usuarioActual,
+      true,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      listaEstadisticas = estadisticas;
+    });
+  }
+
+  Future<void> editarEstadisticasAdmin(Map<String, dynamic> estadistica) async {
+    TextEditingController rachaController = TextEditingController(
+      text: estadistica[Databasehelper.columnaEstadisticasRachaactual]
+          .toString(),
+    );
+
+    TextEditingController diasController = TextEditingController(
+      text: estadistica[Databasehelper.columnaEstadisticasDiascompletados]
+          .toString(),
+    );
+
+    bool? guardar = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Editar estadísticas'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: rachaController,
+                decoration: InputDecoration(labelText: 'Racha actual'),
+              ),
+              TextField(
+                controller: diasController,
+                decoration: InputDecoration(labelText: 'Días completados'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                //el tryParse intenta convertir un texto en un numero
+                int? racha = int.tryParse(rachaController.text);
+                int? dias = int.tryParse(diasController.text);
+
+                if (racha == null || dias == null || racha < 0 || dias < 0) {
+                  return;
+                }
+
+                Navigator.pop(context, true);
+              },
+              child: Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (guardar == true) {
+      int habitoId =
+          estadistica[Databasehelper.columnaEstadisticasHabitoidFK] as int;
+
+      await widget._databasehelper.actualizarEstadisticas(
+        habitoId,
+        int.parse(rachaController.text),
+        int.parse(diasController.text),
+        estadistica[Databasehelper.columnaEstadisticasFechacompletado]
+            as String?,
+      );
+
+      if (mounted) {
+        await cargarEstadisticasAdmin();
+        await cargarHabitosAdmin();
+      }
+    }
+
+    rachaController.dispose();
+    diasController.dispose();
+  }
+
+  //creamos estadisticas para un habito que no tenga
+  Future<void> crearEstadisticasAdmin(Habito habito) async {
+    //recuperamos las estadisticas existentes
+    final estadisticas = await widget._databasehelper.obtenerEstadisticas(
+      widget.usuarioActual,
+      true,
+    );
+
+    //comprobamos que el habito no tenga estadisticas
+    for (Map<String, dynamic> estadistica in estadisticas) {
+      if (estadistica[Databasehelper.columnaEstadisticasHabitoidFK] ==
+          habito.identificador) {
+        return;
+      }
+    }
+
+    //creamos las estadisticas con valores iniciales
+    await widget._databasehelper.insertarEstadisticas(
+      DateTime(0).toString(),
+      0,
+      0,
+      habito.identificador,
+      habito.nombreUsuario,
+    );
+
+    if (!mounted) return;
+
+    //actualizamos las listas
+    await cargarEstadisticasAdmin();
+    await cargarHabitosAdmin();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -257,6 +437,15 @@ class _AdministracionPageState extends State<AdministracionPage> {
 
                     SizedBox(height: 10),
 
+                    ElevatedButton(
+                      onPressed: () {
+                        crearHabitoAdmin(usuario);
+                      },
+                      child: Text('Crear hábito'),
+                    ),
+
+                    SizedBox(height: 10),
+
                     //el admin no puede eliminarse
                     if (usuario != widget.usuarioActual)
                       ElevatedButton(
@@ -278,6 +467,40 @@ class _AdministracionPageState extends State<AdministracionPage> {
           Text(
             'Hábitos registrados',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+
+          SizedBox(height: 16),
+
+          Text(
+            'Estadísticas registradas',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: listaEstadisticas.length,
+              itemBuilder: (context, index) {
+                final estadistica = listaEstadisticas[index];
+
+                return Column(
+                  children: [
+                    Text(
+                      'Usuario: ${estadistica[Databasehelper.columnaEstadisticasUsuarioFK]}',
+                    ),
+                    Text(
+                      'Hábito ID: ${estadistica[Databasehelper.columnaEstadisticasHabitoidFK]}',
+                    ),
+                    Text(
+                      'Racha: ${estadistica[Databasehelper.columnaEstadisticasRachaactual]}',
+                    ),
+                    Text(
+                      'Días completados: ${estadistica[Databasehelper.columnaEstadisticasDiascompletados]}',
+                    ),
+                    SizedBox(height: 12),
+                  ],
+                );
+              },
+            ),
           ),
 
           SizedBox(height: 8),
