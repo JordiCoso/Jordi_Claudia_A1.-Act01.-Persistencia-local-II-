@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:habitosapp/services/databasehelper.dart';
-
-import 'screens/bienvenida.dart';
-import 'screens/principal.dart';
+import 'screens/login_page.dart';
 import 'services/preferenciasservice.dart';
 
-import 'models/usuario.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -107,33 +104,13 @@ class _MyAppState extends State<MyApp> {
               },
 
               //comprobamos si el usuario ya se ha registrado.
-              home: comprobarInicio(
-                widget._preferenciasService,
-                widget._databasehelper,
-              ),
+              home: LoginPage(preferenciasService: widget._preferenciasService,
+                  databasehelper: widget._databasehelper),
             );
+
           },
         );
       },
     );
-  }
-
-  //comprobamos si debemos mostrar Bienvenida o Principal.
-  Widget comprobarInicio(
-    PreferenciasService preferenciasService,
-    Databasehelper databasehelper,
-  ) {
-    //recuperamos los datos del usuario.
-    Usuario usuario = preferenciasService.cargarUsuario();
-
-    //si no tiene nombre o hábitos, mostramos Bienvenida.
-    //si ya tiene datos guardados, mostramos Principal.
-    return (usuario.nombre == '' || usuario.numeroHabitos == 0)
-        ? Bienvenida(preferenciasService: preferenciasService, databasehelper: databasehelper)
-        : Principal(
-            preferenciasService: preferenciasService,
-            databasehelper: databasehelper,
-            usuario: usuario,
-          );
   }
 }

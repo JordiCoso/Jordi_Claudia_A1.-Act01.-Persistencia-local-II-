@@ -122,8 +122,8 @@ class Databasehelper {
       '$columnaEstadisticasDiascompletados INTEGER NOT NULL, '
       '$columnaEstadisticasUsuarioFK TEXT NOT NULL, '
       '$columnaEstadisticasHabitoidFK INTEGER NOT NULL UNIQUE, '
-      'FOREIGN KEY $columnaEstadisticasUsuarioFK REFERENCES $tablaUsuarios($columnaUsuariosUsuario) ON DELETE CASCADE, '
-      'FOREIGN KEY $columnaEstadisticasHabitoidFK REFERENCES $tablaHabitos($columnaHabitosId) ON DELETE CASCADE)',
+      'FOREIGN KEY ($columnaEstadisticasUsuarioFK) REFERENCES $tablaUsuarios($columnaUsuariosUsuario) ON DELETE CASCADE, '
+      'FOREIGN KEY ($columnaEstadisticasHabitoidFK) REFERENCES $tablaHabitos($columnaHabitosId) ON DELETE CASCADE)',
     );
   }
 
@@ -171,6 +171,24 @@ class Databasehelper {
     );
 
     return resultado.isNotEmpty;
+  }
+
+  //comrprobamos si el usuario y la contrtaseña son correctos
+  Future<Map<String, Object?>?> iniciarSesion(
+    String usuario,
+    String contrasena,
+  ) async {
+    final resultado = await _baseDeDatos.query(
+      tablaUsuarios,
+      where: '$columnaUsuariosUsuario = ? AND $columnaUsuariosContrasena = ?',
+      whereArgs: [usuario, contrasena],
+    );
+
+    for (Map<String, Object?> fila in resultado) {
+      return fila;
+    }
+
+    return null;
   }
 
   //guardamos las estadisticas
@@ -227,7 +245,7 @@ class Databasehelper {
     return resultado;
   }
 
-  void guardarHabitos(List<Habito> listaHabitos) async {
+  Future<void> guardarHabitos(List<Habito> listaHabitos) async {
     for (Habito habito in listaHabitos) {
       var resultado = await _baseDeDatos.query(
         tablaHabitos,
@@ -237,7 +255,7 @@ class Databasehelper {
 
       //asigno un numero segun el icono
       int numeroIcono = 0;
-      if(habito.icono.icon == Icons.water_drop) {
+      if (habito.icono.icon == Icons.water_drop) {
         numeroIcono = 0;
       } else if (habito.icono.icon == Icons.directions_run) {
         numeroIcono = 1;
@@ -245,7 +263,7 @@ class Databasehelper {
         numeroIcono = 2;
       }
 
-      if (resultado.isEmpty) {
+      if (resultado.isEmpty && !habito.pendingBorrarse) {
         int hid = await _baseDeDatos.insert(tablaHabitos, {
           columnaHabitosNombre: habito.nombre,
           columnaHabitosColor: habito.convertirColorAString(habito.color),
@@ -307,7 +325,7 @@ class Databasehelper {
           whereArgs: esAdmin ? null : [usuario],
         );
 
-    final List<Map<String, Object?>> keyValueEstadisticas =
+    /* final List<Map<String, Object?>> keyValueEstadisticas =
         await obtenerEstadisticas(usuario, esAdmin);
 
     /// Lista unificada de datos sobre habito.
@@ -359,21 +377,43 @@ class Databasehelper {
 
           default:
         }
-      });
+      });*/
 
-      final habito = Habito.fromBBDD(
-        hid: hid,
-        nombreHabito: nombreHabito,
-        colorString: colorString,
-        completadoInt: completadoInt,
-        iconoInt: numeroIcono,
-        fechaCompletadoString: fechaCompletadoString,
-        rachaActual: rachaActual,
-        diasCompletados: diasCompletados,
-        nombreUsuario: nombreUsuario,
+    for (Map<String, Object?> fila in keyValueHabitosIncompleto) {
+      //buscamos las estadisticas del habito actual
+      final estadisticas = await _baseDeDatos.query(
+        tablaEstadisticas,
+        where: '$columnaEstadisticasHabitoidFK = ?',
+        whereArgs: [fila[columnaHabitosId]],
       );
 
-      habitos.add(habito);
+      for (Map<String, Object?> estadistica in estadisticas) {
+        //declaramos las variables para usarlo en habito.frombddd
+        //los datos de habitos son declarados como fila, y los de estadisticas son declarados como estadistica
+        int hid = fila[columnaHabitosId] as int;
+        String nombreHabito = fila[columnaHabitosNombre] as String;
+        String colorString = fila[columnaHabitosColor] as String;
+        int completadoInt = fila[columnaHabitosCompletado] as int;
+        int numeroIcono = fila[columnaHabitosIcono] as int;
+        String fechaCompletadoString = estadistica[columnaEstadisticasFechacompletado] as String;
+        int rachaActual = estadistica[columnaEstadisticasRachaactual] as int;
+        int diasCompletados = estadistica[columnaEstadisticasDiascompletados] as int;
+        String nombreUsuario = fila [columnaHabitosUsuarioFK] as String;
+
+        final habito = Habito.fromBBDD(
+          hid: hid,
+          nombreHabito: nombreHabito,
+          colorString: colorString,
+          completadoInt: completadoInt,
+          iconoInt: numeroIcono,
+          fechaCompletadoString: fechaCompletadoString,
+          rachaActual: rachaActual,
+          diasCompletados: diasCompletados,
+          nombreUsuario: nombreUsuario,
+        );
+
+        habitos.add(habito);
+      }
     }
 
     return habitos;

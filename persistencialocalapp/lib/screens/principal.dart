@@ -26,13 +26,24 @@ class Principal extends StatefulWidget {
 }
 
 class _PrincipalState extends State<Principal> {
-  late List<Habito> listaHabitos;
+  List<Habito> listaHabitos = [];
 
   @override
-  void initState() async {
+  void initState()  {
     super.initState();
-    listaHabitos = await widget._databasehelper.cargarHabitos(widget._usuario.nombre, widget._usuario.rol);
+    cargarHabitos();
   }
+
+  Future<void> cargarHabitos() async {
+    listaHabitos = await widget._databasehelper.cargarHabitos(widget._usuario.nombre, widget._usuario.rol);
+
+    if(!mounted) return;
+    setState(() {
+
+    });
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -144,11 +155,10 @@ class _PrincipalState extends State<Principal> {
       ),
     );
     // Cuando vuelva cargamos los datos nuevos y remplazamos.
-    setState(() async {
-      listaHabitos = await widget._databasehelper.cargarHabitos(
-        widget._usuario.nombre,
-        widget._usuario.rol,
-      );
+    List<Habito> habitos = await widget._databasehelper.cargarHabitos(widget._usuario.nombre, widget._usuario.rol);
+
+    setState(() {
+      listaHabitos = habitos;
     });
   }
 

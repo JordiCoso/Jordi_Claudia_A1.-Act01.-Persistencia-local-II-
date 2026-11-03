@@ -31,8 +31,8 @@ class Gestiondehabitos extends StatefulWidget {
 // Un enum para que sea mas legible que significa cada codigo de color.
 
 class _GestiondehabitosState extends State<Gestiondehabitos> {
-  List<Habito> listaHabitos =
-      []; //lista donde guardaremos los habitos recuperados de sqflite
+  List<Habito> listaHabitos = []; //lista donde guardaremos los habitos recuperados de sqflite
+  List<Habito> habitosBorrados = []; //guardamos los habitos q queremos borrar
 
   /* Al ser una lista que cambia con el numero de habitos no puedo hardcodear
    * los editing controlers y una variable global de editar.
@@ -55,11 +55,11 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
       widget._usuario.rol,
     );
 
-    if (!mounted) {
-      setState(() {
-        listaHabitos = habitos;
-      });
-    }
+    if (!mounted) return;
+
+    setState(() {
+      listaHabitos = habitos;
+    });
   }
 
   @override
@@ -193,8 +193,17 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
               SizedBox(height: 20),
               BotonPrincipal(
                 texto: 'Guardar',
-                pulsar: () {
-                  widget._databasehelper.guardarHabitos(listaHabitos);
+                pulsar: () async {
+                  //actualizamos los nombres de los habitos
+                  for(int i = 0; i < listaHabitos.length; i++) {
+                    listaHabitos[i].nombre = textEditingControllers[i]?.text ?? listaHabitos[i].nombre;
+                  }
+                  //añado los habitos borrado para guardarlos en sqflite
+                  listaHabitos.addAll(habitosBorrados);
+
+                  await widget._databasehelper.guardarHabitos(listaHabitos);
+
+                  if(!mounted) return;
                   Navigator.pop(context);
                 },
               ),
@@ -221,6 +230,9 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
 
   void _borrarHabito(int index) {
     setState(() {
+      //marco el habito para borrarlo de sqflite
+      listaHabitos[index].pendingBorrarse = true;
+      habitosBorrados.add(listaHabitos[index]);
       // Lo borro asi tengo uno limpio cada vez que cree uno nuevo
       textEditingControllers[index]?.dispose();
       // Si no lo borro de la lista intentara usar el controlador que ha hecho .dispose()
@@ -233,9 +245,7 @@ class _GestiondehabitosState extends State<Gestiondehabitos> {
   TextEditingController _darControllador(int index) {
     // Nos aseguramos que si no existe le de uno nuevo.
     TextEditingController controllador =
-        textEditingControllers[index] ?? TextEditingController();
-    // Si esta en la lista es porque es un habito que ya tiene texto.
-    controllador.text = listaHabitos[index].nombre;
+        textEditingControllers[index] ?? TextEditingController(text: listaHabitos[index].nombre);
     // Nos aseguramos que si no existia ahora este en el Map.
     textEditingControllers[index] = controllador;
     // Finalmente se lo damos al parametro controller:
