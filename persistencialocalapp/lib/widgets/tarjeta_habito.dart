@@ -28,6 +28,7 @@ class TarjetaHabito extends StatelessWidget {
     this.cambiarIcono,
   });
 
+  // Declaro el estilo para no repetir codigo
   static final ButtonStyle estilo = ElevatedButton.styleFrom(
     padding: const EdgeInsets.all(0),
     alignment: Alignment.center,
@@ -41,6 +42,7 @@ class TarjetaHabito extends StatelessWidget {
     return Expanded(
       child: Row(
         children: [
+          // Si le hemos pasado la funcion estamos estamos en habitos_page
           if (completar != null)
             Checkbox(value: completado, onChanged: completar),
           if (completar != null) Expanded(child: icono),

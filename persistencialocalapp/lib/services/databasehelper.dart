@@ -364,6 +364,7 @@ class Databasehelper {
     }
   }
 
+  // Al estar separado en dos tablas tendremos que hacer querys a las dos.
   Future<List<Habito>> cargarHabitos(String usuario, String rol) async {
     List<Habito> habitos = [];
 
@@ -408,7 +409,6 @@ class Databasehelper {
         diasCompletados =
             estadistica[columnaEstadisticasDiascompletados] as int;
       }
-
 
       final habito = Habito.fromBBDD(
         hid: hid,
