@@ -150,7 +150,7 @@ class _PrincipalState extends State<Principal> {
                         databasehelper: widget._databasehelper,
                       ),
                     ),
-                        (route) => false,
+                    (route) => false,
                   );
                 },
                 child: Text('Cerrar sesión'),
@@ -165,7 +165,10 @@ class _PrincipalState extends State<Principal> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AdministracionPage(databasehelper: widget._databasehelper,),
+                        builder: (context) => AdministracionPage(
+                          databasehelper: widget._databasehelper,
+                          usuarioActual: widget._usuario.nombre,
+                        ),
                       ),
                     );
                   },

@@ -191,6 +191,39 @@ class Databasehelper {
     return resultado;
   }
 
+  //eliminamos un usuario de la bbdd, para q el admin pueda eliminarlos bien
+  Future<int> eliminarUsuario(String usuario) async {
+    final resultado = await _baseDeDatos.delete(
+      tablaUsuarios,
+      where: '$columnaUsuariosUsuario = ?',
+      whereArgs: [usuario],
+    );
+    return resultado;
+  }
+
+  //se actualizan los datos cuando un admin modifica el usuario
+  Future<int> actualizarUsuario(
+    String usuario,
+    String nombre,
+    String apellidos,
+    String email,
+    String rol,
+  ) async {
+    final resultado = await _baseDeDatos.update(
+      tablaUsuarios,
+      {
+        columnaUsuariosNombre: nombre,
+        columnaUsuariosApellidos: apellidos,
+        columnaUsuariosEmail: email,
+        columnaUsuariosRol: rol,
+      },
+      where: '$columnaUsuariosUsuario = ?',
+      whereArgs: [usuario],
+    );
+
+    return resultado;
+  }
+
   //comrprobamos si el usuario y la contrtaseña son correctos
   Future<Map<String, Object?>?> iniciarSesion(
     String usuario,
@@ -413,10 +446,12 @@ class Databasehelper {
         String colorString = fila[columnaHabitosColor] as String;
         int completadoInt = fila[columnaHabitosCompletado] as int;
         int numeroIcono = fila[columnaHabitosIcono] as int;
-        String fechaCompletadoString = estadistica[columnaEstadisticasFechacompletado] as String;
+        String fechaCompletadoString =
+            estadistica[columnaEstadisticasFechacompletado] as String;
         int rachaActual = estadistica[columnaEstadisticasRachaactual] as int;
-        int diasCompletados = estadistica[columnaEstadisticasDiascompletados] as int;
-        String nombreUsuario = fila [columnaHabitosUsuarioFK] as String;
+        int diasCompletados =
+            estadistica[columnaEstadisticasDiascompletados] as int;
+        String nombreUsuario = fila[columnaHabitosUsuarioFK] as String;
 
         final habito = Habito.fromBBDD(
           hid: hid,
