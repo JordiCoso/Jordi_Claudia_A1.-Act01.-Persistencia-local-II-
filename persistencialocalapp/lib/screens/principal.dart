@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitosapp/screens/administracion_page.dart';
 
 import '../services/databasehelper.dart';
 import '../services/preferenciasservice.dart';
@@ -7,6 +8,7 @@ import '../models/usuario.dart';
 import 'ajustes.dart';
 import 'estadisticas_page.dart';
 import 'gestiondehabitos.dart';
+import 'login_page.dart';
 
 class Principal extends StatefulWidget {
   // Nos pasan usuario y preferencias service
@@ -29,21 +31,20 @@ class _PrincipalState extends State<Principal> {
   List<Habito> listaHabitos = [];
 
   @override
-  void initState()  {
+  void initState() {
     super.initState();
     cargarHabitos();
   }
 
   Future<void> cargarHabitos() async {
-    listaHabitos = await widget._databasehelper.cargarHabitos(widget._usuario.nombre, widget._usuario.rol);
+    listaHabitos = await widget._databasehelper.cargarHabitos(
+      widget._usuario.nombre,
+      widget._usuario.rol,
+    );
 
-    if(!mounted) return;
-    setState(() {
-
-    });
+    if (!mounted) return;
+    setState(() {});
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +136,41 @@ class _PrincipalState extends State<Principal> {
                 },
                 child: Text('Estadísticas'),
               ),
+
+              SizedBox(height: 16),
+
+              //creo el boton de cerrar sesion para hacer pruebas con el usuario admin
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginPage(
+                        preferenciasService: widget._preferenciasService,
+                        databasehelper: widget._databasehelper,
+                      ),
+                    ),
+                        (route) => false,
+                  );
+                },
+                child: Text('Cerrar sesión'),
+              ),
+
+              SizedBox(height: 16),
+
+              //boton q solo saldrá si el user es admin
+              if (widget._usuario.rol == 'admin')
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AdministracionPage(databasehelper: widget._databasehelper,),
+                      ),
+                    );
+                  },
+                  child: Text('Administración'),
+                ),
             ],
           ),
         ),
@@ -155,7 +191,10 @@ class _PrincipalState extends State<Principal> {
       ),
     );
     // Cuando vuelva cargamos los datos nuevos y remplazamos.
-    List<Habito> habitos = await widget._databasehelper.cargarHabitos(widget._usuario.nombre, widget._usuario.rol);
+    List<Habito> habitos = await widget._databasehelper.cargarHabitos(
+      widget._usuario.nombre,
+      widget._usuario.rol,
+    );
 
     setState(() {
       listaHabitos = habitos;

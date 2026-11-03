@@ -125,6 +125,17 @@ class Databasehelper {
       'FOREIGN KEY ($columnaEstadisticasUsuarioFK) REFERENCES $tablaUsuarios($columnaUsuariosUsuario) ON DELETE CASCADE, '
       'FOREIGN KEY ($columnaEstadisticasHabitoidFK) REFERENCES $tablaHabitos($columnaHabitosId) ON DELETE CASCADE)',
     );
+
+    //creamos el admin de prueba
+    await db.insert(tablaUsuarios, {
+      columnaUsuariosUsuario: 'admin',
+      columnaUsuariosNombre: 'Administrador',
+      columnaUsuariosApellidos: 'Prueba',
+      columnaUsuariosEmail: 'admin@gmail.com',
+      columnaUsuariosContrasena: 'admin123',
+      columnaUsuariosFechacreacion: DateTime.now().toString(),
+      columnaUsuariosRol: 'admin',
+    });
   }
 
   //creamos la funcion para insertar el usuario
@@ -171,6 +182,13 @@ class Databasehelper {
     );
 
     return resultado.isNotEmpty;
+  }
+
+  //obtenemos todos los usuarios para el administrador
+  Future<List<Map<String, Object?>>> obtenerUsuarios() async {
+    final resultado = await _baseDeDatos.query(tablaUsuarios);
+
+    return resultado;
   }
 
   //comrprobamos si el usuario y la contrtaseña son correctos
